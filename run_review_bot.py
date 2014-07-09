@@ -81,6 +81,7 @@ class ReviewBot(Bot):
 
     # Get the Redditor's last reviews in Sub containing Keywords in the title
     def get_last_reviews(self, redditor, keywords, sub):
+        keywords.append('review')
         logging.info(Bot.get_time() + '    Listing Reviews: {0}'.format(str(redditor)))
         counter = 0
         author_posts = redditor.get_submitted(limit=None)
@@ -94,7 +95,6 @@ class ReviewBot(Bot):
 
     # Check if user's submission is a review
     def submission_is_review(self, submission, keywords, sub):
-        keywords.append('review')
         title = not submission.is_self \
         and submission.subreddit.display_name.lower() in sub \
         and all(keyword.lower() in submission.title.lower() for keyword in keywords)
