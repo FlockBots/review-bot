@@ -52,9 +52,7 @@ class ReviewBot(Bot):
         for _, _, sub, _, keyword in matches:
             if not keyword:
                 keyword = ''
-                keywords = []
-            else:
-                keywords = [keyword]
+            keywords = keyword.split()
             if not sub:
                 sub = self.review_subs
             else:
