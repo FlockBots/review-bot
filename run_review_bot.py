@@ -26,7 +26,7 @@ class ReviewBot(Bot):
     # Set certain parameters and variables for the bot
     def set_configurables(self):
         Bot.set_configurables(self)
-        self.reply_header = '\n\n{0}\'s {1} reviews in {2}:\n\n'
+        self.reply_header = '\n\n/u/{0}\'s \"{1}\" reviews in /r/{2}:\n\n'
         self.reply_footer = '\n___\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
@@ -59,20 +59,23 @@ class ReviewBot(Bot):
                 sub = self.review_subs
             else:
                 sub = [sub.lower()]
-            # list reply functions here to add a single reply
-            reply += self.reply_header.format(comment.author, keyword, sub)
+
             reviews = self.get_last_reviews(comment.author, keywords, sub)
+
+            # list reply functions here to add a single reply
+            if len(sub) == 1:
+                sub = sub[0]
+            reply += self.reply_header.format(comment.author, keyword, sub)
             reply += self.list_reviews(reviews)
         if matches:    
             reply += self.reply_footer
-            # Bot.handle_ratelimit(comment.reply, reply)
-            print(reply)
+            Bot.handle_ratelimit(comment.reply, reply)
             self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
         if len(reviews) == 0:
-            return 'No reviews yet!'
+            return '* Nothing here yet.'
         else:
             text = ''
             for title, url in reviews:
@@ -86,7 +89,6 @@ class ReviewBot(Bot):
         counter = 0
         author_posts = redditor.get_submitted(limit=None)
         last_reviews = []
-        print(self.list_limit)
         for post in author_posts:
             if counter < self.list_limit and self.submission_is_review(post, keywords, sub):
                 last_reviews.append((post.title, post.permalink))
@@ -99,7 +101,6 @@ class ReviewBot(Bot):
         and submission.subreddit.display_name.lower() in sub \
         and all(keyword.lower() in submission.title.lower() for keyword in keywords)
         if title:
-            print(Bot.get_time() + ": " + submission.title + " - " + str(keywords) + " - " + str(sub))
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
