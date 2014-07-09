@@ -79,7 +79,7 @@ class ReviewBot(Bot):
         else:
             text = ''
             for title, url in reviews:
-                text += "* [{0}]({1})\n".format(title, url)
+                text += u'* [{0}]({1})\n'.format(title, url).encode('utf-8')
             return text
 
     # Get the Redditor's last reviews in Sub containing Keywords in the title
