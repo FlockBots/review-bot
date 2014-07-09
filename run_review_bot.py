@@ -31,7 +31,7 @@ class ReviewBot(Bot):
         self.list_limit = 10
         self.triggers = {
         #(@reviewbot)( [\'|\"]([a-z0-9_\ -]+)[\'\"])?( network:(scotch|bourbon|worldwhisky))?
-            '@review_bot': re.compile(r'(@review_bot)( [\'|\"]([a-z0-9_\ -]+)[\'\"])?( network:(scotch|bourbon|worldwhisky))?', re.I),
+            '@review_bot': re.compile(r'(@review_bot)( network:(scotch|bourbon|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
         }
         self.subreddits = ['FlockBots']
         # self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
