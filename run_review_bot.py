@@ -53,17 +53,20 @@ class ReviewBot(Bot):
             if not keyword:
                 keyword = ''
                 keywords = []
+            else:
+                keywords = [keyword]
             if not sub:
                 sub = self.review_subs
             else:
-                sub = [sub]
+                sub = [sub.lower()]
             # list reply functions here to add a single reply
             reply += self.reply_header.format(comment.author, keyword, sub)
             reviews = self.get_last_reviews(comment.author, keywords, sub)
             reply += self.list_reviews(reviews)
         if matches:    
             reply += self.reply_footer
-            Bot.handle_ratelimit(comment.reply, reply)
+            # Bot.handle_ratelimit(comment.reply, reply)
+            print(reply)
             self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
@@ -94,7 +97,7 @@ class ReviewBot(Bot):
         keywords.append('review')
         title = not submission.is_self \
         and submission.subreddit.display_name.lower() in sub \
-        and all(keyword in submission.title.lower() for keyword in keywords)
+        and all(keyword.lower() in submission.title.lower() for keyword in keywords)
         if title:
             print(Bot.get_time() + ": " + submission.title + " - " + str(keywords) + " - " + str(sub))
             submission.replace_more_comments(limit=None, threshold=0)
