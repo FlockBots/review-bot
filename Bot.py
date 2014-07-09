@@ -54,7 +54,7 @@ class Bot:
             time.sleep(Bot.sleep_time(self.idle_count, self.refresh_rate, self.refresh_cap))
         except requests.exceptions.HTTPError as e:
             self.http_error_count += 1
-            if http_error_count > 5:
+            if self.http_error_count > 5:
                 raise EnvironmentError('No connection available.')
             else:
                 time.sleep(150)
