@@ -66,7 +66,7 @@ class Bot:
     @staticmethod
     def sleep_time(n, y_min, y_max, speed = 3):
         x     = min(180, n * speed)
-        angle = math(math.radians(x))
+        angle = math.radians(x)
         y     = (-math.cos(x) * (y_max - y_min) / 2) + (y_max + y_min) / 2
         return int(y)
 
