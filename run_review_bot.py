@@ -61,10 +61,10 @@ class ReviewBot(Bot):
             reply += self.reply_header.format(comment.author, keyword, sub)
             reviews = self.get_last_reviews(comment.author, keywords, sub)
             reply += self.list_reviews(reviews)
-            
-        reply += self.reply_footer
-        Bot.handle_ratelimit(comment.reply, reply)
-        self.idle_count = 0
+        if matches:    
+            reply += self.reply_footer
+            Bot.handle_ratelimit(comment.reply, reply)
+            self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
