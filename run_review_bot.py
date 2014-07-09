@@ -10,7 +10,6 @@ class ReviewBot(Bot):
 
     # Check the latest hot submissions in subreddit
     def check_submissions(self, subreddit):
-        global idle_count
         subreddit = self.reddit.get_subreddit(subreddit)
         for submission in subreddit.get_hot(limit=20):
             submission.replace_more_comments(limit=None, threshold=0)
@@ -19,7 +18,7 @@ class ReviewBot(Bot):
                 if not Comment.is_parsed(comment.id):
                     self.check_triggers(comment)
                     Comment.add(comment.id, self.db.session)
-        idle_count += 1
+        self.idle_count += 1
 
     def check_messages(self):
         pass
@@ -27,7 +26,7 @@ class ReviewBot(Bot):
     # Set certain parameters and variables for the bot
     def set_configurables(self):
         Bot.set_configurables(self)
-        self.reply_header = '{0}\'s reviews:\n\n'
+        self.reply_header = '{0}\'s {1} reviews in {2}:\n\n'
         self.reply_footer = '\n___\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
@@ -49,21 +48,21 @@ class ReviewBot(Bot):
 
         # Matches contains tuples in the format:
         # (@reviewbot, ' keyword', keyword, ' network:sub', subreddit)
+        reply = self.reply_header.format(comment.author, keyword, sub)
         for _, _, keyword, _, sub in matches:
             if not keyword:
+                keyword = ''
                 keywords = ['']
             if not sub:
                 sub = self.review_subs
             else:
                 sub = [sub]
             # list reply functions here to add a single reply
-            reply = self.reply_header.format(comment.author)
-
             reviews = self.get_last_reviews(comment.author, keywords, sub)
             reply += self.list_reviews(reviews)
-            reply += self.reply_footer
-
-            Bot.handle_ratelimit(comment.reply, reply)
+            
+        reply += self.reply_footer
+        Bot.handle_ratelimit(comment.reply, reply)
             idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
