@@ -63,7 +63,7 @@ class ReviewBot(Bot):
             
         reply += self.reply_footer
         Bot.handle_ratelimit(comment.reply, reply)
-            idle_count = 0
+        self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
