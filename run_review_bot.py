@@ -26,8 +26,8 @@ class ReviewBot(Bot):
     # Set certain parameters and variables for the bot
     def set_configurables(self):
         Bot.set_configurables(self)
-        self.reply_header = '{0}\'s {1} reviews in {2}:\n\n'
-        self.reply_footer = '\n___\n^(Please report any issues to /u/FlockOnFire)\n\n'
+        self.reply_header = '\n\n{0}\'s {1} reviews in {2}:\n\n'
+        self.reply_footer = '\n___\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
         #(@reviewbot)( [\'|\"]([a-z0-9_\ -]+)[\'\"])?( network:(scotch|bourbon|worldwhisky))?
@@ -47,12 +47,12 @@ class ReviewBot(Bot):
         matches = pattern.findall(comment.body)
 
         # Matches contains tuples in the format:
-        # (@review_bot, ' keyword', keyword, ' network:sub', subreddit)
+        # (@review_bot, ' network:sub', subreddit, ' keyword', keyword)
         reply = ''
-        for _, _, keyword, _, sub in matches:
+        for _, _, sub, _, keyword in matches:
             if not keyword:
                 keyword = ''
-                keywords = ['']
+                keywords = []
             if not sub:
                 sub = self.review_subs
             else:
