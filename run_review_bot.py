@@ -87,7 +87,6 @@ class ReviewBot(Bot):
             if counter < self.list_limit and self.submission_is_review(post, keywords, sub):
                 last_reviews.append((post.title, post.permalink))
                 counter += 1
-                print(str(counter))
         return last_reviews
 
     # Check if user's submission is a review
@@ -97,7 +96,7 @@ class ReviewBot(Bot):
         and submission.subreddit.display_name.lower() in sub \
         and all(keyword in submission.title.lower() for keyword in keywords)
         if title:
-            print(Bot.get_time() + ": " + submission.title)
+            print(Bot.get_time() + ": " + submission.title + " - " + str(keywords) + " - " + str(sub))
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
