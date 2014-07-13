@@ -12,7 +12,7 @@ class ReviewBot(Bot):
     def check_submissions(self, subreddit):
         global idle_count
         subreddit = self.reddit.get_subreddit(subreddit)
-        for submission in subreddit.get_hot(limit=20):
+        for submission in subreddit.get_hot(limit=30):
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
@@ -31,11 +31,10 @@ class ReviewBot(Bot):
         self.reply_footer = '\n___\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
-        #(@reviewbot)( [\'|\"]([a-z0-9_\ -]+)[\'\"])?( network:(scotch|bourbon|worldwhisky))?
-            '@review_bot': re.compile(r'(@review_bot)( [\'|\"]([a-z0-9_\ -]+)[\'\"])?( network:(scotch|bourbon|worldwhisky))?', re.I),
+            '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
         }
-        self.subreddits = ['FlockBots']
-        # self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
+        # self.subreddits = ['FlockBots']
+        self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
         self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
         print("""
             Subreddits:          {0}
