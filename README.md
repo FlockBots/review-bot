@@ -9,6 +9,7 @@ Below are the commands Review_Bot looks for in the comments. All commands are ca
 
 ### Generic
 > @review_bot
+
 Lists up to 10 of the user's reviews across the /r/Whisky network.
 
 ### Keyworded
