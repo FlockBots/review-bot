@@ -30,10 +30,10 @@ class ReviewBot(Bot):
         self.reply_footer = '\n\n___\n\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
-            '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
+            '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|whisky|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
         }
         self.sub_from_subscriptions = True 
-        self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
+        self.review_subs = ['scotch', 'bourbon', 'whisky', 'worldwhisky']
         print("""
             List limit:          {0}
         """.format(self.list_limit))
