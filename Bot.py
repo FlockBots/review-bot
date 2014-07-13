@@ -25,7 +25,7 @@ class Bot:
     def set_configurables(self):
         self.refresh_rate = 10
         self.refresh_cap  = 120
-        self.sub_from_subscriptions = false
+        self.sub_from_subscriptions = False
 
     def login(self, username = None, password = None, from_file = None):
         reddit = praw.Reddit('User-Agent: {0}'.format(self.name))
