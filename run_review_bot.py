@@ -27,7 +27,7 @@ class ReviewBot(Bot):
     def set_configurables(self):
         Bot.set_configurables(self)
         self.reply_header = '\n\n/u/{0}\'s {1} reviews in /r/{2}:\n\n'
-        self.reply_footer = '\n___\n\n^(Please report any issues to /u/FlockOnFire)'
+        self.reply_footer = '\n\n___\n\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
             '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
