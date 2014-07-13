@@ -13,13 +13,20 @@ Lists up to 10 of the user's reviews across the /r/Whisky network.
 
 ### Keyworded
 > @review_bot 'Caol Ila'
+
+or
+
 > @review_bot "Caol Ila"
-Lists all reviews which titles contains the phrase 'Caol Ila'.
+
+Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Ila'.
 
 
 ### Per subreddit
 > @review_bot scotch|bourbon|worldwhisky
-Lists all reviews from just one subreddit (/r/Scotch, /r/Bourbon *or* /r/WorldWhisky)
+
+Lists up to 10 of the user's reviews from just one subreddit (/r/Scotch, /r/Bourbon *or* /r/WorldWhisky)
 
 ### Combined
 > @review_bot scotch|bourbon|worldwhisky 'Caol Ila'
+
+Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Isla' from one subreddit.
