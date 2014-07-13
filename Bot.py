@@ -25,6 +25,7 @@ class Bot:
     def set_configurables(self):
         self.refresh_rate = 10
         self.refresh_cap  = 120
+        self.sub_from_subscriptions = false
 
     def login(self, username = None, password = None, from_file = None):
         reddit = praw.Reddit('User-Agent: {0}'.format(self.name))
@@ -48,6 +49,8 @@ class Bot:
 
     def loop(self):
         try:
+            if self.sub_from_subscriptions:
+                self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
             for sub in self.subreddits:
                 self.check_submissions(sub)
             self.check_messages()
@@ -107,14 +110,34 @@ class Comment(Database.Base):
         self.id = comment_id
 
     @staticmethod
-    def add(comment_id, session):
-        session.add(Comment(comment_id))
+    def add(id, session):
+        session.add(Comment(id))
         session.commit()
 
     @staticmethod
-    def is_parsed(comment_id):
-        return Comment.query.filter(Comment.id == comment_id).count() > 0
+    def is_parsed(id):
+        return Comment.query.filter(Comment.id == id).count() > 0
 
     @staticmethod
     def find(id):
         return Comment.query.filter(Comment.id == id).first()
+
+class Submission(Database.Base):
+    __tablename__ = 'submissions'
+    id = Column(String, primary_key=True)
+
+    def __init__(self, submission_id):
+        self.id = submission_id
+
+    @staticmethod
+    def add(id, session):
+        session.add(Submission(id))
+        session.commit()
+
+    @staticmethod
+    def is_parsed(id):
+        return Submission.query.filter(Submission.id == id).count() > 0
+
+    @staticmethod
+    def find(id):
+        return Submission.query.filter(Submission.id == id).first()
