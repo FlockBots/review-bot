@@ -18,8 +18,8 @@ Lists all reviews which titles contains the phrase 'Caol Ila'.
 
 
 ### Per subreddit
-> @review_bot network:scotch|bourbon|worldwhisky
+> @review_bot scotch|bourbon|worldwhisky
 Lists all reviews from just one subreddit (/r/Scotch, /r/Bourbon *or* /r/WorldWhisky)
 
 ### Combined
-> @review_bot network:scotch|bourbon|worldwhisky 'Caol Ila'
+> @review_bot scotch|bourbon|worldwhisky 'Caol Ila'
