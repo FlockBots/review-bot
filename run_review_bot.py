@@ -33,7 +33,7 @@ class ReviewBot(Bot):
             '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
         }
         # self.subreddits = ['FlockBots']
-        self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
+        self.sub_from_subscriptions = True
         self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
         print("""
             Subreddits:          {0}
