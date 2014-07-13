@@ -10,7 +10,6 @@ class ReviewBot(Bot):
 
     # Check the latest hot submissions in subreddit
     def check_submissions(self, subreddit):
-        global idle_count
         subreddit = self.reddit.get_subreddit(subreddit)
         for submission in subreddit.get_hot(limit=30):
             submission.replace_more_comments(limit=None, threshold=0)
@@ -19,7 +18,7 @@ class ReviewBot(Bot):
                 if not Comment.is_parsed(comment.id):
                     self.check_triggers(comment)
                     Comment.add(comment.id, self.db.session)
-        idle_count += 1
+        self.idle_count += 1
 
     def check_messages(self):
         pass
@@ -27,7 +26,7 @@ class ReviewBot(Bot):
     # Set certain parameters and variables for the bot
     def set_configurables(self):
         Bot.set_configurables(self)
-        self.reply_header = '{0}\'s reviews:\n\n'
+        self.reply_header = '\n\n/u/{0}\'s {1} reviews in /r/{2}:\n\n'
         self.reply_footer = '\n___\n^(Please report any issues to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
@@ -47,56 +46,58 @@ class ReviewBot(Bot):
         matches = pattern.findall(comment.body)
 
         # Matches contains tuples in the format:
-        # (@reviewbot, ' keyword', keyword, ' network:sub', subreddit)
-        for _, _, keyword, _, sub in matches:
+        # (@review_bot, ' network:sub', subreddit, ' keyword', keyword)
+        reply = ''
+        for _, _, sub, _, keyword in matches:
             if not keyword:
-                keywords = ['']
+                keyword = ''
+            keywords = keyword.split()
             if not sub:
                 sub = self.review_subs
             else:
-                sub = [sub]
-            # list reply functions here to add a single reply
-            reply = self.reply_header.format(comment.author)
+                sub = [sub.lower()]
 
             reviews = self.get_last_reviews(comment.author, keywords, sub)
-            reply += self.list_reviews(reviews)
-            reply += self.reply_footer
 
+            # list reply functions here to add a single reply
+            if len(sub) == 1:
+                sub = sub[0]
+            reply += self.reply_header.format(comment.author, keyword, sub)
+            reply += self.list_reviews(reviews)
+        if matches:    
+            reply += self.reply_footer
             Bot.handle_ratelimit(comment.reply, reply)
-            idle_count = 0
+            self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
         if len(reviews) == 0:
-            return 'No reviews yet!'
+            return '* Nothing here yet.'
         else:
             text = ''
             for title, url in reviews:
-                text += "* [{0}]({1})\n".format(title, url)
+                text += u'* [{0}]({1})\n'.format(title, url).encode('utf-8')
             return text
 
     # Get the Redditor's last reviews in Sub containing Keywords in the title
     def get_last_reviews(self, redditor, keywords, sub):
+        keywords.append('review')
         logging.info(Bot.get_time() + '    Listing Reviews: {0}'.format(str(redditor)))
         counter = 0
         author_posts = redditor.get_submitted(limit=None)
         last_reviews = []
-        print(self.list_limit)
         for post in author_posts:
             if counter < self.list_limit and self.submission_is_review(post, keywords, sub):
                 last_reviews.append((post.title, post.permalink))
                 counter += 1
-                print(str(counter))
         return last_reviews
 
     # Check if user's submission is a review
     def submission_is_review(self, submission, keywords, sub):
-        keywords.append('review')
         title = not submission.is_self \
         and submission.subreddit.display_name.lower() in sub \
-        and all(keyword in submission.title.lower() for keyword in keywords)
+        and all(keyword.lower() in submission.title.lower() for keyword in keywords)
         if title:
-            print(Bot.get_time() + ": " + submission.title)
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:

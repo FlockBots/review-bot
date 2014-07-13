@@ -52,9 +52,10 @@ class Bot:
                 self.check_submissions(sub)
             self.check_messages()
             time.sleep(Bot.sleep_time(self.idle_count, self.refresh_rate, self.refresh_cap))
+            self.http_error_count = 0
         except requests.exceptions.HTTPError as e:
             self.http_error_count += 1
-            if http_error_count > 5:
+            if self.http_error_count > 5:
                 raise EnvironmentError('No connection available.')
             else:
                 time.sleep(150)
@@ -66,7 +67,7 @@ class Bot:
     @staticmethod
     def sleep_time(n, y_min, y_max, speed = 3):
         x     = min(180, n * speed)
-        angle = math(math.radians(x))
+        angle = math.radians(x)
         y     = (-math.cos(x) * (y_max - y_min) / 2) + (y_max + y_min) / 2
         return int(y)
 
