@@ -51,6 +51,9 @@ class Bot:
         try:
             if self.sub_from_subscriptions:
                 self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
+            else:
+                self.subreddits = ['FlockBots']
+            logging.info(self.subreddits)
             for sub in self.subreddits:
                 self.check_submissions(sub)
             self.check_messages()
