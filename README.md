@@ -19,7 +19,8 @@ or
 
 > @review_bot "Caol Ila"
 
-Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Ila'.
+Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Ila'. 
+The order doesn't matter and as stated above the search is case insensitive.
 
 
 ### Per subreddit
