@@ -11,7 +11,7 @@ class ReviewBot(Bot):
     # Check the latest hot submissions in subreddit
     def check_submissions(self, subreddit):
         subreddit = self.reddit.get_subreddit(subreddit)
-        for submission in subreddit.get_hot(limit=30):
+        for submission in subreddit.get_hot(limit=25):
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
