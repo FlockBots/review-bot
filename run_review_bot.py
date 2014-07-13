@@ -32,13 +32,11 @@ class ReviewBot(Bot):
         self.triggers = {
             '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\'|\"]([a-z0-9_\ -]+)[\'\"])?', re.I),
         }
-        # self.subreddits = ['FlockBots']
-        self.sub_from_subscriptions = True
+        self.sub_from_subscriptions = True 
         self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
         print("""
-            Subreddits:          {0}
-            List limit:          {1}
-        """.format(self.subreddits, self.list_limit))
+            List limit:          {0}
+        """.format(self.list_limit))
 
     # Check comment for triggers
     def check_triggers(self, comment):
