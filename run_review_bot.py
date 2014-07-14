@@ -1,5 +1,6 @@
 import re, praw, logging, requests
 from Bot import Bot, Comment, Database
+import classifier
 
 db = Database()
 
@@ -9,12 +10,21 @@ class ReviewBot(Bot):
             self.loop()
 
     # Check the latest hot submissions in subreddit
+    # replace by self.check_comments
     def check_submissions(self, subreddit):
         subreddit = self.reddit.get_subreddit(subreddit)
         for submission in subreddit.get_hot(limit=25):
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
+                if not Comment.is_parsed(comment.id):
+                    self.check_triggers(comment)
+                    Comment.add(comment.id, self.db.session)
+        self.idle_count += 1
+
+    def check_comments(self, subreddit):
+        comments = self.reddit.get_comments(subreddit)
+        for comment in comments:
                 if not Comment.is_parsed(comment.id):
                     self.check_triggers(comment)
                     Comment.add(comment.id, self.db.session)
@@ -112,6 +122,13 @@ class ReviewBot(Bot):
         if comment.author != author:
             return False
         return all(string in comment.body.lower() for string in ['finish', 'nose'])
+
+    def get_comment_class(self, comment):
+        with open('test.tmp', 'w') as f:
+            f.write(comment.body)
+        X_test = classifier.vectorizer.transform(['test.tmp'])
+        return clf.predict(X_test)[0]
+
 
 review_bot = ReviewBot('Review_Bot 2.0 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
 review_bot.run()
