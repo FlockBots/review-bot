@@ -124,9 +124,9 @@ class ReviewBot(Bot):
         return all(string in comment.body.lower() for string in ['finish', 'nose'])
 
     def get_comment_class(self, comment):
-        with open('test.tmp', 'w') as f:
-            f.write(comment.body)
-        X_test = classifier.vectorizer.transform(['test.tmp'])
+        classifier.vectorizer.input = 'content'
+        X_test = classifier.vectorizer.transform(comment.body)
+        classifier.vectorizer.input = 'filename' # undo side-effect
         return clf.predict(X_test)[0]
 
 
