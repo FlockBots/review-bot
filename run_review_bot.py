@@ -39,20 +39,6 @@ class ReviewBot(Bot):
         while True:
             self.loop()
 
-
-    # Check the latest hot submissions in subreddit
-    # replace by self.check_comments
-    def check_submissions(self, subreddit):
-        subreddit = self.reddit.get_subreddit(subreddit)
-        for submission in subreddit.get_hot(limit=25):
-            submission.replace_more_comments(limit=None, threshold=0)
-            comments = praw.helpers.flatten_tree(submission.comments)
-            for comment in comments:
-                if not Comment.is_parsed(comment.id):
-                    self.check_triggers(comment)
-                    Comment.add(comment.id, self.db.session)
-        self.idle_count += 1
-
     def check_comments(self, subreddit):
         logging.debug('checking latest on {0}'.format(subreddit))
         comments = self.reddit.get_comments(subreddit)
@@ -156,7 +142,7 @@ class ReviewBot(Bot):
             sub = self.review_subs
         reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
         for review in reviews:
-            print(review.title)
+            logging.debug(review.title)
             lower_title = str(review.title.lower())
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
@@ -174,7 +160,7 @@ class ReviewBot(Bot):
             for comment in comments:
                 try:
                     if self.get_comment_class(comment = comment) == 1 and comment.author == submission.author:
-                        print('    contains a review comment')
+                        logging.debug('    contains a review comment')
                         return comment
                 except requests.exceptions.HTTPError as e:
                     logging.warning(Bot.get_time() + '    {0}'.format(e))
@@ -205,9 +191,9 @@ class ReviewBot(Bot):
 
     # Reply - separate function for debugging purposes.
     def reply(self, comment, text):
-        # Bot.handle_ratelimit(comment.reply, reply)
-        print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
-        print()
+        Bot.handle_ratelimit(comment.reply, reply)
+        # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
+        # print()
 
 review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
 review_bot.run()
