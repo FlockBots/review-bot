@@ -10,7 +10,7 @@ import os
 def append_dir(dir, fname):
     return dir + '/' +fname
 
-file_vectorizer = TfidfVectorizer(
+vectorizer = TfidfVectorizer(
     input         = 'filename',
     stop_words    = 'english',
     strip_accents = 'ascii'
@@ -19,10 +19,10 @@ file_vectorizer = TfidfVectorizer(
 training_set = [append_dir('train', f) for f in os.listdir('train')]
 # test_set = [append_dir('test', f) for f in os.listdir('test')]
 
-X_train = file_vectorizer.fit_transform(training_set)
+X_train = vectorizer.fit_transform(training_set)
 y_train = 225 * [-1] + 225 * [1]
 
-# X_test = file_vectorizer.transform(test_set)
+# X_test = vectorizer.transform(test_set)
 
 clf = LinearSVC()
 clf.fit(X_train, y_train)
