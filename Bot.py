@@ -4,6 +4,9 @@ import praw, time, logging, requests, sys, math
 class Bot:
     def __init__(self, name, log_file, username = None, password = None, from_file = None, database = None):
         logging.basicConfig(filename=log_file, level=logging.INFO)
+        logging.getLogger().addHandler(logging.StreamHandler())
+
+
         self.name = name
         self.db = database
         if from_file:
