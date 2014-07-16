@@ -54,7 +54,7 @@ class ReviewBot(Bot):
         self.idle_count += 1
 
     def check_comments(self, subreddit):
-        print('checking latest on {0}'.format(subreddit))
+        logging.debug('checking latest on {0}'.format(subreddit))
         comments = self.reddit.get_comments(subreddit)
         for comment in comments:
                 if not Comment.is_parsed(comment.id):
@@ -128,12 +128,12 @@ class ReviewBot(Bot):
 
     # Add the user's last reviews to the database
     def add_last_reviews(self, redditor):
+        logging.debug('Adding {}\'s reviews to the database'.format(str(redditor)))
         posts = redditor.get_submitted(limit=None)
         for post in posts:
             if Review.query.filter(Review.submission_id == post.id).first():
                 print(str(post.id))
                 break
-            print(post.title.encode('utf-8'))
             review_comment = self.submission_is_review(submission = post)
             if review_comment:
                 review_date = date.fromtimestamp(review_comment.created_utc)
@@ -147,9 +147,11 @@ class ReviewBot(Bot):
                     score = int(self.get_score(review_comment.body))
                 )
                 review.add(self.db.session)
+                logging.debug('Adding review ({}) to database.'.format())
 
     # returns a generator with all matching reviews
     def get_reviews(self, redditor, keywords = [], sub = None):
+        logging.info('Getting {}\'s {} reviews'.format(str(redditor), keywords))
         if not sub:
             sub = self.review_subs
         reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
@@ -162,28 +164,23 @@ class ReviewBot(Bot):
 
     # Check if user's submission is a review
     def submission_is_review(self, submission):
+        logging.debug('Checking Submission({})'.format(submission.id))
         title = not submission.is_self \
         and submission.subreddit.display_name.lower() in self.review_subs
         if title:
-            print('Title okay')
+            logging.debug('    properties check out')
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
                 try:
                     if self.get_comment_class(comment = comment) == 1 and comment.author == submission.author:
-                        print('Submission is review')
+                        print('    contains a review comment')
                         return comment
                 except requests.exceptions.HTTPError as e:
                     logging.warning(Bot.get_time() + '    {0}'.format(e))
                     continue
+        logging.debug('    not a review')
         return None
-
-
-    # Check if the comment is part of the review
-    def comment_is_review(self, comment, author):
-        if comment.author != author:
-            return False
-        return all(string in comment.body.lower() for string in ['finish', 'nose'])
 
     # Get comment class
     # Returns 1 if comment is a review
