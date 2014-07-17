@@ -1,5 +1,36 @@
 import re, praw, logging, requests
 from Bot import Bot, Comment, Database
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.sql.expression import desc
+import classifier
+from datetime import date
+
+# specify additional database tables here
+# Check Bot.py for examples
+
+class Review(Database.Base):
+    __tablename__ = 'reviews'
+    id = Column(Integer, primary_key=True)
+    submission_id = Column(String)
+    title = Column(String)
+    user = Column(String)
+    url = Column(String)
+    subreddit = Column(String)
+    date = Column(Integer)
+    score = Column(Integer, nullable=True)
+
+    def __init__(self, submission_id, title, user, url, subreddit, date, score):
+        self.submission_id = submission_id
+        self.title = title
+        self.user = user
+        self.url = url
+        self.subreddit = subreddit
+        self.date = date
+        self.score = score
+
+    def add(self, session):
+        session.add(self)
+        session.commit()
 
 db = Database()
 
@@ -8,13 +39,10 @@ class ReviewBot(Bot):
         while True:
             self.loop()
 
-    # Check the latest hot submissions in subreddit
-    def check_submissions(self, subreddit):
-        subreddit = self.reddit.get_subreddit(subreddit)
-        for submission in subreddit.get_hot(limit=25):
-            submission.replace_more_comments(limit=None, threshold=0)
-            comments = praw.helpers.flatten_tree(submission.comments)
-            for comment in comments:
+    def check_comments(self, subreddit):
+        logging.debug('checking latest on {0}'.format(subreddit))
+        comments = self.reddit.get_comments(subreddit)
+        for comment in comments:
                 if not Comment.is_parsed(comment.id):
                     self.check_triggers(comment)
                     Comment.add(comment.id, self.db.session)
@@ -59,7 +87,8 @@ class ReviewBot(Bot):
             else:
                 sub = [sub.lower()]
 
-            reviews = self.get_last_reviews(comment.author, keywords, sub)
+            self.add_last_reviews(comment.author)
+            reviews = self.get_reviews(comment.author, keywords, sub)
 
             # list reply functions here to add a single reply
             if len(sub) == 1:
@@ -68,54 +97,112 @@ class ReviewBot(Bot):
             reply += self.list_reviews(reviews)
         if matches:    
             reply += self.reply_footer
-            Bot.handle_ratelimit(comment.reply, reply)
+            self.reply(comment, reply)
             self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
-        if len(reviews) == 0:
-            return '* Nothing here yet.'
-        else:
-            text = ''
-            for title, url in reviews:
-                text += u'* [{0}]({1})\n'.format(title, url).encode('utf-8')
-            return text
-
-    # Get the Redditor's last reviews in Sub containing Keywords in the title
-    def get_last_reviews(self, redditor, keywords, sub):
-        keywords.append('review')
-        logging.info(Bot.get_time() + '    Listing Reviews: {0}'.format(str(redditor)))
+        text = ''
+        listed = []
         counter = 0
-        author_posts = redditor.get_submitted(limit=None)
-        last_reviews = []
-        for post in author_posts:
-            if counter < self.list_limit and self.submission_is_review(post, keywords, sub):
-                last_reviews.append((post.title, post.permalink))
-                counter += 1
-        return last_reviews
+        for subm_id, title, url, score in reviews:
+            if counter >= self.list_limit:
+                break
+            if subm_id in listed:
+                continue
+            text += '* [{0}]({1}) - **{2}**/100\n'.format(str(title), str(url), score)
+            counter += 1
+        if text == '':
+            text = '* Nothing here yet.\n'
+        return text
+
+    # Add the user's last reviews to the database
+    def add_last_reviews(self, redditor):
+        logging.debug('Adding {}\'s reviews to the database'.format(str(redditor)))
+        posts = redditor.get_submitted(limit=None)
+        for post in posts:
+            if Review.query.filter(Review.submission_id == post.id).first():
+                print(str(post.id))
+                break
+            review_comment = self.submission_is_review(submission = post)
+            if review_comment:
+                review_date = date.fromtimestamp(review_comment.created_utc)
+                review = Review(
+                    submission_id = post.id,
+                    title = post.title,
+                    user = str(post.author).lower(),
+                    url = post.permalink,
+                    subreddit = post.subreddit.display_name.lower(),
+                    date = review_date.strftime('%Y%m%d'),
+                    score = int(self.get_score(review_comment.body))
+                )
+                review.add(self.db.session)
+                logging.debug('Adding review ({}) to database.'.format())
+
+    # returns a generator with all matching reviews
+    def get_reviews(self, redditor, keywords = [], sub = None):
+        logging.info('Getting {}\'s {} reviews'.format(str(redditor), keywords))
+        if not sub:
+            sub = self.review_subs
+        reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
+        for review in reviews:
+            logging.debug(review.title)
+            lower_title = str(review.title.lower())
+            if review.subreddit in sub \
+            and all([keyword.lower() in lower_title for keyword in keywords]):
+                yield (review.submission_id, review.title, review.url, review.score)
 
     # Check if user's submission is a review
-    def submission_is_review(self, submission, keywords, sub):
+    def submission_is_review(self, submission):
+        logging.debug('Checking Submission({})'.format(submission.id))
         title = not submission.is_self \
-        and submission.subreddit.display_name.lower() in sub \
-        and all(keyword.lower() in submission.title.lower() for keyword in keywords)
+        and submission.subreddit.display_name.lower() in self.review_subs
         if title:
+            logging.debug('    properties check out')
             submission.replace_more_comments(limit=None, threshold=0)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
                 try:
-                    if self.comment_is_review(comment, submission.author):
-                        return True
+                    if self.get_comment_class(comment = comment) == 1 and comment.author == submission.author:
+                        logging.debug('    contains a review comment')
+                        return comment
                 except requests.exceptions.HTTPError as e:
                     logging.warning(Bot.get_time() + '    {0}'.format(e))
                     continue
-        return False
+        logging.debug('    not a review')
+        return None
 
-    # Check if the comment is part of the review
-    def comment_is_review(self, comment, author):
-        if comment.author != author:
-            return False
-        return all(string in comment.body.lower() for string in ['finish', 'nose'])
+    # Get comment class
+    # Returns 1 if comment is a review
+    # Returns -1 if comment is not a review
+    def get_comment_class(self, text = None, comment = None):
+        if comment:
+            text = comment.body
+        classifier.vectorizer.input = 'content'
+        X_test = classifier.vectorizer.transform([text])
+        classifier.vectorizer.input = 'filename' # undo side-effect
+        return classifier.clf.predict(X_test)[0]
 
+    # Get the score out of a comment
+    def get_score(self, text = None, comment = None):
+        if comment:
+            text = comment.body
+        pattern = re.compile(r'[*]*(\d+)[*]* ?\/ ?100')
+        score = pattern.search(text)
+        if score:
+            return score.group(1)
+        return ''
+
+    # Reply - separate function for debugging purposes.
+    def reply(self, comment, text):
+        Bot.handle_ratelimit(comment.reply, reply)
+        # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
+        # print()
+
+<<<<<<< HEAD
 review_bot = ReviewBot('Review_Bot 2.0 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
 review_bot.run()
+=======
+review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
+review_bot.run()
+>>>>>>> 5565e7a316bffef649b7a4e94b6b064e4f80aa2b

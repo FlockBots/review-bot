@@ -4,6 +4,9 @@ import praw, time, logging, requests, sys, math
 class Bot:
     def __init__(self, name, log_file, username = None, password = None, from_file = None, database = None):
         logging.basicConfig(filename=log_file, level=logging.INFO)
+        logging.getLogger().addHandler(logging.StreamHandler())
+
+
         self.name = name
         self.db = database
         if from_file:
@@ -44,6 +47,9 @@ class Bot:
     def check_submissions(self, subreddit):
         pass
 
+    def check_comments(self, subreddit):
+        pass
+        
     def check_messages(self):
         pass
 
@@ -54,8 +60,9 @@ class Bot:
             else:
                 self.subreddits = ['FlockBots']
             for sub in self.subreddits:
-                self.check_submissions(sub)
-            self.check_messages()
+                self.check_comments(sub)
+                # self.check_submissions(sub)
+            # self.check_messages()
             time.sleep(Bot.sleep_time(self.idle_count, self.refresh_rate, self.refresh_cap))
             self.http_error_count = 0
         except requests.exceptions.HTTPError as e:
@@ -120,10 +127,6 @@ class Comment(Database.Base):
     def is_parsed(id):
         return Comment.query.filter(Comment.id == id).count() > 0
 
-    @staticmethod
-    def find(id):
-        return Comment.query.filter(Comment.id == id).first()
-
 class Submission(Database.Base):
     __tablename__ = 'submissions'
     id = Column(String, primary_key=True)
@@ -139,7 +142,3 @@ class Submission(Database.Base):
     @staticmethod
     def is_parsed(id):
         return Submission.query.filter(Submission.id == id).count() > 0
-
-    @staticmethod
-    def find(id):
-        return Submission.query.filter(Submission.id == id).first()
