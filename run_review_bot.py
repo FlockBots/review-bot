@@ -127,10 +127,10 @@ class ReviewBot(Bot):
             review_comment = self.submission_is_review(submission = post)
             if review_comment:
                 review_date = date.fromtimestamp(review_comment.created_utc)
-        try:
-             score = int(self.get_score(comment = review_comment))
-        except:
-            score = None
+                try:
+                     score = int(self.get_score(comment = review_comment))
+                except:
+                    score = None
                 review = Review(
                     submission_id = post.id,
                     title = post.title,
