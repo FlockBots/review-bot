@@ -128,7 +128,7 @@ class ReviewBot(Bot):
             if review_comment:
                 review_date = date.fromtimestamp(review_comment.created_utc)
 		try:
- 		    score = int(self.get_score(review_comment.body))
+ 		    score = int(self.get_score(comment = review_comment))
 		except:
 		    score = None
                 review = Review(
