@@ -199,10 +199,5 @@ class ReviewBot(Bot):
         # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
         # print()
 
-<<<<<<< HEAD
-review_bot = ReviewBot('Review_Bot 2.0 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
-review_bot.run()
-=======
 review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
 review_bot.run()
->>>>>>> 5565e7a316bffef649b7a4e94b6b064e4f80aa2b
