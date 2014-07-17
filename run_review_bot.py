@@ -67,8 +67,8 @@ class ReviewBot(Bot):
         """.format(self.list_limit))
 
     def set_properties(self):
-	Bot.set_properties(self)
-	self.refresh_cap = 30
+    Bot.set_properties(self)
+    self.refresh_cap = 30
 
     # Check comment for triggers
     def check_triggers(self, comment):
@@ -127,10 +127,10 @@ class ReviewBot(Bot):
             review_comment = self.submission_is_review(submission = post)
             if review_comment:
                 review_date = date.fromtimestamp(review_comment.created_utc)
-		try:
- 		    score = int(self.get_score(comment = review_comment))
-		except:
-		    score = None
+        try:
+             score = int(self.get_score(comment = review_comment))
+        except:
+            score = None
                 review = Review(
                     submission_id = post.id,
                     title = post.title,
@@ -151,11 +151,11 @@ class ReviewBot(Bot):
         reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
         for review in reviews:
             logging.debug(review.title)
-            lower_title = str(review.title.lower())
+            lower_title = review.title.lower()
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
-		if not review.score:
-		    review.score = '??'
+        if not review.score:
+            review.score = '??'
                 yield (review.submission_id, review.title, review.url, review.score)
 
     # Check if user's submission is a review
