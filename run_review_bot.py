@@ -154,8 +154,8 @@ class ReviewBot(Bot):
             lower_title = review.title.lower()
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
-        if not review.score:
-            review.score = '??'
+                if not review.score:
+                    review.score = '??'
                 yield (review.submission_id, review.title, review.url, review.score)
 
     # Check if user's submission is a review
