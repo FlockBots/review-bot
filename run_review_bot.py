@@ -67,8 +67,8 @@ class ReviewBot(Bot):
         """.format(self.list_limit))
 
     def set_properties(self):
-    Bot.set_properties(self)
-    self.refresh_cap = 30
+        Bot.set_properties(self)
+        self.refresh_cap = 30
 
     # Check comment for triggers
     def check_triggers(self, comment):
