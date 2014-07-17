@@ -112,6 +112,7 @@ class ReviewBot(Bot):
                 continue
             text += '* [{0}]({1}) - **{2}**/100\n'.format(str(title), str(url), score)
             counter += 1
+            listed.append(subm_id)
         if text == '':
             text = '* Nothing here yet.\n'
         return text
