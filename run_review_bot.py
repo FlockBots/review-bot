@@ -122,7 +122,6 @@ class ReviewBot(Bot):
         posts = redditor.get_submitted(limit=None)
         for post in posts:
             if Review.query.filter(Review.submission_id == post.id).first():
-                print(str(post.id))
                 break
             review_comment = self.submission_is_review(submission = post)
             if review_comment:
@@ -133,7 +132,7 @@ class ReviewBot(Bot):
                     score = None
                 review = Review(
                     submission_id = post.id,
-                    title = post.title,
+                    title = bytes(post.title, 'utf-8'),
                     user = str(post.author).lower(),
                     url = post.permalink,
                     subreddit = post.subreddit.display_name.lower(),
@@ -151,12 +150,13 @@ class ReviewBot(Bot):
         reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
         for review in reviews:
             logging.debug(review.title)
-            lower_title = review.title.lower()
+            title = str(review.title.decode('utf-8'))
+            lower_title = title.lower()
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
                 if not review.score:
                     review.score = '??'
-                yield (review.submission_id, review.title, review.url, review.score)
+                yield (review.submission_id, title, review.url, review.score)
 
     # Check if user's submission is a review
     def submission_is_review(self, submission):
