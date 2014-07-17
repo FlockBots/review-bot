@@ -24,7 +24,7 @@ y_train = 225 * [-1] + 225 * [1]
 
 # X_test = vectorizer.transform(test_set)
 
-clf = LinearSVC()
+clf = BernoulliNB()
 clf.fit(X_train, y_train)
 
 # predictions = clf.predict(X_test)
