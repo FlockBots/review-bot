@@ -130,6 +130,7 @@ class ReviewBot(Bot):
                 try:
                      score = int(self.get_score(comment = review_comment))
                 except:
+                    logging.debug('   Warning: no score')
                     score = None
                 review = Review(
                     submission_id = post.id,
@@ -170,8 +171,9 @@ class ReviewBot(Bot):
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
                 try:
+                    logging.debug('    {}'.format(comment.permalink))
                     if self.get_comment_class(comment = comment) == 1 and comment.author == submission.author:
-                        logging.debug('    contains a review comment')
+                        logging.debug('        contains a review')
                         return comment
                 except requests.exceptions.HTTPError as e:
                     logging.warning(Bot.get_time() + '    {0}'.format(e))
