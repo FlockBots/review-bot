@@ -127,6 +127,10 @@ class ReviewBot(Bot):
             review_comment = self.submission_is_review(submission = post)
             if review_comment:
                 review_date = date.fromtimestamp(review_comment.created_utc)
+		try:
+ 		    score = int(self.get_score(review_comment.body))
+		except:
+		    score = None
                 review = Review(
                     submission_id = post.id,
                     title = post.title,
@@ -134,10 +138,10 @@ class ReviewBot(Bot):
                     url = post.permalink,
                     subreddit = post.subreddit.display_name.lower(),
                     date = review_date.strftime('%Y%m%d'),
-                    score = int(self.get_score(review_comment.body))
+                    score = score 
                 )
                 review.add(self.db.session)
-                logging.debug('Adding review ({}) to database.'.format())
+                logging.debug('Adding review ({}) to database.'.format(review.submission_id))
 
     # returns a generator with all matching reviews
     def get_reviews(self, redditor, keywords = [], sub = None):
@@ -150,6 +154,8 @@ class ReviewBot(Bot):
             lower_title = str(review.title.lower())
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
+		if not review.score:
+		    review.score = '??'
                 yield (review.submission_id, review.title, review.url, review.score)
 
     # Check if user's submission is a review
@@ -195,7 +201,7 @@ class ReviewBot(Bot):
 
     # Reply - separate function for debugging purposes.
     def reply(self, comment, text):
-        Bot.handle_ratelimit(comment.reply, reply)
+        Bot.handle_ratelimit(comment.reply, text)
         # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
         # print()
 
