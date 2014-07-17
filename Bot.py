@@ -14,9 +14,9 @@ class Bot:
         else:
             self.reddit = self.login(username, password)
 
-        self.set_configurables()
         self.set_properties()
-
+        self.set_configurables()
+        
         init_msg = """
         Starting {0}...
             Username:            {1}
