@@ -120,7 +120,7 @@ class ReviewBot(Bot):
     # Add the user's last reviews to the database
     def add_last_reviews(self, redditor):
         logging.debug('Adding {}\'s reviews to the database'.format(str(redditor)))
-        posts = redditor.get_submitted(limit=None)
+        posts = redditor.get_submitted(limit=None, comment_sort='top')
         for post in posts:
             if Review.query.filter(Review.submission_id == post.id).first():
                 break
