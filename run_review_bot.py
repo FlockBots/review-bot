@@ -32,8 +32,6 @@ class Review(Database.Base):
         session.add(self)
         session.commit()
 
-db = Database()
-
 class ReviewBot(Bot):
     def run(self):
         while True:
@@ -197,7 +195,7 @@ class ReviewBot(Bot):
     def get_score(self, text = None, comment = None):
         if comment:
             text = comment.body
-        pattern = re.compile(r'[*]*(\d+)[*]* ?\/ ?100')
+        pattern = re.compile(r'(\d+)[*]* ?\/ ?100')
         score = pattern.search(text)
         if score:
             return score.group(1)
@@ -209,5 +207,6 @@ class ReviewBot(Bot):
         # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
         # print()
 
+db = Database('bot.db')
 review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
 review_bot.run()
