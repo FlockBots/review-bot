@@ -165,7 +165,7 @@ class ReviewBot(Bot):
         reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
         for review in reviews:
             logging.debug(review.title)
-            title = str(review.title).decode('UTF-8')
+            title = str(review.title.decode('UTF-8'))
             lower_title = title.lower()
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
