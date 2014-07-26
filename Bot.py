@@ -16,7 +16,6 @@ class Bot:
 
         self.set_properties()
         self.set_configurables()
-	print(self.sub_from_subscriptions)
         
         init_msg = """
         Starting {0}...
