@@ -47,13 +47,13 @@ class ReviewBot(Bot):
         self.idle_count += 1
 
     def check_submissions(self, subreddit):
-	logging.debug('checking latest posts on {0}'.format(subreddit))
-	submissions = self.reddit.get_subreddit(subreddit).get_new_by_date(limit=100)
-	for submission in submissions:
-	    if not Submission.is_parsed(submission.id):
-		self.check_triggers(submission)
-		Submission.add(submission.id, self.db.session)
-	self.idle_count += 1
+        logging.debug('checking latest posts on {0}'.format(subreddit))
+        submissions = self.reddit.get_subreddit(subreddit).get_new_by_date(limit=100)
+        for submission in submissions:
+            if not Submission.is_parsed(submission.id):
+                self.check_triggers(submission)
+                Submission.add(submission.id, self.db.session)
+        self.idle_count += 1
 
     def check_messages(self):
         pass
@@ -79,11 +79,11 @@ class ReviewBot(Bot):
 
     # Check comment for triggers
     def check_triggers(self, post):
-	body = ''
-	if isinstance(post, praw.objects.Comment):
-	    body = post.body
-	elif isinstance(post, praw.objects.Submission):
-	    body = post.selftext
+        body = ''
+        if isinstance(post, praw.objects.Comment):
+            body = post.body
+        elif isinstance(post, praw.objects.Submission):
+            body = post.selftext
         pattern = self.triggers['@review_bot']
         matches = pattern.findall(body)
 
@@ -165,7 +165,7 @@ class ReviewBot(Bot):
         reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
         for review in reviews:
             logging.debug(review.title)
-            title = str(review.title.decode('UTF-8'))
+            title = str(review.title.decode('utf-8'))
             lower_title = title.lower()
             if review.subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
@@ -217,10 +217,10 @@ class ReviewBot(Bot):
 
     # Reply - separate function for debugging purposes.
     def reply(self, post, text):
-	if isinstance(post, praw.objects.Comment):
-	    Bot.handle_ratelimit(post.reply, text)
-	elif isinstance(post, praw.objects.Submission):
-	    Bot.handle_ratelimit(post.add_comment, text)
+        if isinstance(post, praw.objects.Comment):
+            Bot.handle_ratelimit(post.reply, text)
+        elif isinstance(post, praw.objects.Submission):
+            Bot.handle_ratelimit(post.add_comment, text)
         # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
         # print()
 
