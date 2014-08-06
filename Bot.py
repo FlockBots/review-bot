@@ -61,7 +61,7 @@ class Bot:
                 self.subreddits = ['FlockBots']
             for sub in self.subreddits:
                 self.check_comments(sub)
-                # self.check_submissions(sub)
+                self.check_submissions(sub)
             # self.check_messages()
             time.sleep(Bot.sleep_time(self.idle_count, self.refresh_rate, self.refresh_cap))
             self.http_error_count = 0

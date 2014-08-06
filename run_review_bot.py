@@ -1,5 +1,5 @@
 import re, praw, logging, requests
-from Bot import Bot, Comment, Database
+from Bot import Bot, Comment, Submission, Database
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.expression import desc
 import classifier
@@ -46,6 +46,15 @@ class ReviewBot(Bot):
                     Comment.add(comment.id, self.db.session)
         self.idle_count += 1
 
+    def check_submissions(self, subreddit):
+        logging.debug('checking latest posts on {0}'.format(subreddit))
+        submissions = self.reddit.get_subreddit(subreddit).get_new_by_date(limit=100)
+        for submission in submissions:
+            if not Submission.is_parsed(submission.id):
+                self.check_triggers(submission)
+                Submission.add(submission.id, self.db.session)
+        self.idle_count += 1
+
     def check_messages(self):
         pass
 
@@ -69,9 +78,14 @@ class ReviewBot(Bot):
         self.refresh_cap = 30
 
     # Check comment for triggers
-    def check_triggers(self, comment):
+    def check_triggers(self, post):
+        body = ''
+        if isinstance(post, praw.objects.Comment):
+            body = post.body
+        elif isinstance(post, praw.objects.Submission):
+            body = post.selftext
         pattern = self.triggers['@review_bot']
-        matches = pattern.findall(comment.body)
+        matches = pattern.findall(body)
 
         # Matches contains tuples in the format:
         # (@review_bot, ' network:sub', subreddit, ' keyword', keyword)
@@ -85,17 +99,17 @@ class ReviewBot(Bot):
             else:
                 sub = [sub.lower()]
 
-            self.add_last_reviews(comment.author)
-            reviews = self.get_reviews(comment.author, keywords, sub)
+            self.add_last_reviews(post.author)
+            reviews = self.get_reviews(post.author, keywords, sub)
 
             # list reply functions here to add a single reply
             if len(sub) == 1:
                 sub = sub[0]
-            reply += self.reply_header.format(comment.author, keyword, sub)
+            reply += self.reply_header.format(post.author, keyword, sub)
             reply += self.list_reviews(reviews)
         if matches:    
             reply += self.reply_footer
-            self.reply(comment, reply)
+            self.reply(post, reply)
             self.idle_count = 0
 
     # Generate a markdown list of review tuples (title, url)
@@ -202,8 +216,11 @@ class ReviewBot(Bot):
         return ''
 
     # Reply - separate function for debugging purposes.
-    def reply(self, comment, text):
-        Bot.handle_ratelimit(comment.reply, text)
+    def reply(self, post, text):
+        if isinstance(post, praw.objects.Comment):
+            Bot.handle_ratelimit(post.reply, text)
+        elif isinstance(post, praw.objects.Submission):
+            Bot.handle_ratelimit(post.add_comment, text)
         # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
         # print()
 
