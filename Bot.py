@@ -71,7 +71,7 @@ class Bot:
                 raise EnvironmentError('No connection available.')
             else:
                 time.sleep(150)
-        except Exception, e:
+        except Exception as e:
             logging.exception('Terminating due to error')
 
     def set_properties(self):
