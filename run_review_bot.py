@@ -48,7 +48,7 @@ class ReviewBot(Bot):
 
     def check_submissions(self, subreddit):
         logging.debug('checking latest posts on {0}'.format(subreddit))
-        submissions = self.reddit.get_subreddit(subreddit).get_new_by_date(limit=100)
+        submissions = self.reddit.get_subreddit(subreddit).get_new(limit=100)
         for submission in submissions:
             if not Submission.is_parsed(submission.id):
                 self.check_triggers(submission)
