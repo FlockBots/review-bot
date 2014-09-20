@@ -191,7 +191,7 @@ class ReviewBot(Bot):
                         logging.debug('        contains a review')
                         return comment
                 except requests.exceptions.HTTPError as e:
-                    logging.warning(Bot.get_time() + '    {0}'.format(e))
+                    logging.warning(e)
                     continue
         logging.debug('    not a review')
         return None

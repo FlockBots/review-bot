@@ -3,7 +3,12 @@ import praw, time, logging, requests, sys, math
 
 class Bot:
     def __init__(self, name, log_file, username = None, password = None, from_file = None, database = None):
-        logging.basicConfig(filename=log_file, level=logging.INFO)
+        logging.basicConfig(
+            filename=log_file,
+            level=logging.INFO,
+            format = '{asctime} | {levelname:^8} | {message}',
+            style='{'
+        )
         logging.getLogger().addHandler(logging.StreamHandler())
         requests_logger = logging.getLogger('requests')
         requests_logger.setLevel(logging.WARNING)
@@ -63,7 +68,7 @@ class Bot:
             for sub in self.subreddits:
                 self.check_comments(sub)
                 self.check_submissions(sub)
-            # self.check_messages()
+            self.check_messages()
             time.sleep(Bot.sleep_time(self.idle_count, self.refresh_rate, self.refresh_cap))
             self.http_error_count = 0
         except requests.exceptions.HTTPError as e:
@@ -86,10 +91,6 @@ class Bot:
         angle = math.radians(x)
         y     = (-math.cos(x) * (y_max - y_min) / 2) + (y_max + y_min) / 2
         return int(y)
-
-    @staticmethod
-    def get_time():
-        return time.strftime("%d-%m-%Y %H:%M:%S")
 
     @staticmethod
     def handle_ratelimit(func, *args, **kwargs):
