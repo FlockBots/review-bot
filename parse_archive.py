@@ -133,11 +133,15 @@ def migration_succeeded():
     cursor = db.cursor()
     count = cursor.execute('SELECT COUNT(*) FROM {table}'.format(table=DB_TABLE)).fetchone()[0]
     db.close()
-    return count > 10
+    return count > 8000
 
-logging.basicConfig(format='{asctime} | {levelname:^8} | {message}', style='{')
+logging.basicConfig(
+    filename='parser.log',
+    level=logging.INFO,
+    format='{asctime} | {levelname:^8} | {message}', 
+    style='{'
+)
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 req_logger = logging.getLogger('requests')
 req_logger.propagate = False
 
