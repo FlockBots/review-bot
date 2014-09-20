@@ -19,7 +19,6 @@ CSV_ARCHIVE = 'archive.csv'
 ARCHIVE_KEY = '0AsnkEzAVwhUVdF91M3R1NFdvQWYwY1JEeHNpNnZCbVE'
 # # # END CONFIG
 
-
 def download():
     logging.debug('Downloading CSV Archive.')
     opener = build_opener(HTTPCookieProcessor(CookieJar()))
@@ -113,7 +112,6 @@ def parse(archive, db):
             logging.debug(' | {} documents parsed.'.format(counter))
     db.commit()
 
-
 def migrate_reviews():
     logging.info('Migrating Reviews.')
     db = sqlite3.connect(DB_BOT)
@@ -129,11 +127,13 @@ def migrate_reviews():
 
 # Temporary solution
 def migration_succeeded():
-    db = sqlite3.connect(DB_BOT)
-    cursor = db.cursor()
-    count = cursor.execute('SELECT COUNT(*) FROM {table}'.format(table=DB_TABLE)).fetchone()[0]
-    db.close()
-    return count > 8000
+    with sqlite3.connect(DB_BK) as db:
+        c = db.cursor()
+        old_db_size = c.execute('SELECT COUNT(*) FROM {table}'.format(table=DB_TABLE)).fetchone()[0]
+    with sqlite3.connect(DB_BOT) as db:
+        cursor = db.cursor()
+        new_db_size = cursor.execute('SELECT COUNT(*) FROM {table}'.format(table=DB_TABLE)).fetchone()[0]
+    return count > old_db_size
 
 logging.basicConfig(
     filename='parser.log',
