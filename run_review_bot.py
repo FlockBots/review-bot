@@ -186,7 +186,8 @@ class ReviewBot(Bot):
             for comment in comments:
                 try:
                     logging.debug('    {}'.format(comment.permalink))
-                    if self.get_comment_class(comment = comment) == 1 and comment.author == submission.author:
+                    if self.get_comment_class(comment = comment) == 1 and \
+                    comment.author == submission.author and len(comment) > 200:
                         logging.debug('        contains a review')
                         return comment
                 except requests.exceptions.HTTPError as e:
