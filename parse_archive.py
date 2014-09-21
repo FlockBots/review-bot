@@ -6,7 +6,7 @@
 # - Test/Check if migration was successfull
 # Start Bot
 
-import os, csv, shutil, sqlite3, praw, requests, logging
+import os, csv, shutil, sqlite3, praw, requests, logging, codecs
 from http.cookiejar import CookieJar
 from urllib.request import build_opener, HTTPCookieProcessor
 
@@ -146,7 +146,7 @@ req_logger.propagate = False
 
 download()
 tmp_db = create_tmp_db()
-with open(CSV_ARCHIVE, encoding='utf-8', mode='r') as archive:
+with codecs.open(CSV_ARCHIVE, 'r', 'utf-8') as archive:
     parse(archive, tmp_db)
 shutil.copy(DB_BOT, DB_BK)
 migrate_reviews()
