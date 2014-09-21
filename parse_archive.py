@@ -146,7 +146,7 @@ req_logger.propagate = False
 
 download()
 tmp_db = create_tmp_db()
-with open(CSV_ARCHIVE, encoding='utf-8', 'r') as archive:
+with open(CSV_ARCHIVE, encoding='utf-8', mode='r') as archive:
     parse(archive, tmp_db)
 shutil.copy(DB_BOT, DB_BK)
 migrate_reviews()
