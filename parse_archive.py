@@ -6,7 +6,7 @@
 # - Test/Check if migration was successfull
 # Start Bot
 
-import os, csv, shutil, sqlite3, praw, requests, logging, codecs
+import os, csv, shutil, sqlite3, praw, requests, logging
 from http.cookiejar import CookieJar
 from urllib.request import build_opener, HTTPCookieProcessor
 
@@ -24,7 +24,7 @@ def download():
     opener = build_opener(HTTPCookieProcessor(CookieJar()))
     resp = opener.open('https://docs.google.com/spreadsheet/ccc?key={key}&output=csv'.format(key=ARCHIVE_KEY))
     data = resp.read().decode('utf-8')
-    with open(CSV_ARCHIVE, 'w') as f:
+    with open(CSV_ARCHIVE, encoding='utf-8', mode = 'w') as f:
         f.write(data)
 
 def create_table(cursor):
@@ -146,7 +146,7 @@ req_logger.propagate = False
 
 download()
 tmp_db = create_tmp_db()
-with codecs.open(CSV_ARCHIVE, 'r', 'utf-8') as archive:
+with open(CSV_ARCHIVE, encoding='utf-8', mode='r') as archive:
     parse(archive, tmp_db)
 shutil.copy(DB_BOT, DB_BK)
 migrate_reviews()
