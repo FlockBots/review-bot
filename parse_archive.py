@@ -125,7 +125,6 @@ def migrate_reviews():
     db.close()
 
 
-# Temporary solution
 def migration_succeeded():
     with sqlite3.connect(DB_BK) as db:
         c = db.cursor()
@@ -133,7 +132,7 @@ def migration_succeeded():
     with sqlite3.connect(DB_BOT) as db:
         cursor = db.cursor()
         new_db_size = cursor.execute('SELECT COUNT(*) FROM {table}'.format(table=DB_TABLE)).fetchone()[0]
-    return count > old_db_size
+    return new_db_size >= old_db_size
 
 logging.basicConfig(
     filename='parser.log',
