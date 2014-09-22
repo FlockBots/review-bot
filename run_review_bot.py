@@ -255,8 +255,6 @@ class ReviewBot(Bot):
             Bot.handle_ratelimit(post.reply, text)
         elif isinstance(post, praw.objects.Submission):
             Bot.handle_ratelimit(post.add_comment, text)
-        print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
-        print(text.encode('utf-8'))
 
 with sqlite3.connect('bot.db') as db:
     create_review_table(db)
