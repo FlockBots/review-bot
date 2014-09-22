@@ -261,8 +261,4 @@ class ReviewBot(Bot):
 with sqlite3.connect('bot.db') as db:
     create_review_table(db)
     review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
-    r = review_bot.get_reviews('FlockOnFire')
-    for title, url, score in r:
-        print(title)
-    input()
     review_bot.run()
