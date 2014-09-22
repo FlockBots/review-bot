@@ -1,36 +1,72 @@
 import re, praw, logging, requests
-from Bot import Bot, Comment, Submission, Database
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.sql.expression import desc
+from Bot import Bot, Comment, Submission
+import sqlite3
 import classifier
 from datetime import date
 
 # specify additional database tables here
 # Check Bot.py for examples
+class Review():
+    table = 'reviews'
 
-class Review(Database.Base):
-    __tablename__ = 'reviews'
-    id = Column(Integer, primary_key=True)
-    submission_id = Column(String)
-    title = Column(String)
-    user = Column(String)
-    url = Column(String)
-    subreddit = Column(String)
-    date = Column(Integer)
-    score = Column(Integer, nullable=True)
+    @staticmethod
+    def add(submission_id, title, user, url, subreddit, date, score, db):
+        cursor = db.cursor()
+        try:
+            cursor.execute(
+                'INSERT INTO {} VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)'
+                .format(Review.table),
+                (submission_id, title, user, url,
+                 subreddit, date, score)
+            )
+        except sqlite3.IntegrityError: # skip inserting this one
+                logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
+        except:
+            logging.exception('Unable to add review to database.')
+        else:
+            db.commit()
 
-    def __init__(self, submission_id, title, user, url, subreddit, date, score):
-        self.submission_id = submission_id
-        self.title = title
-        self.user = user
-        self.url = url
-        self.subreddit = subreddit
-        self.date = date
-        self.score = score
+    @staticmethod
+    def find(submission_id, user, db):
+        cursor = db.cursor()
+        try:
+            result = cursor.execute(
+                'SELECT submission_id, user FROM {} WHERE submission_id = ? AND user = ?'
+                .format(Review.table), (submission_id, user)
+            )
+        except:
+            logging.exception('Unable to perform Select query on Reviews.')
+        else:
+            return result.fetchone()
 
-    def add(self, session):
-        session.add(self)
-        session.commit()
+    @staticmethod
+    def get(user, count = 10):
+        cursor = db.cursor()
+        try:
+            result = cursor.execute(
+                'SELECT title, url, subreddit, score FROM {} WHERE user = ? ORDER BY date DESC'
+                .format(Review.table), (user,)
+            )
+        except:
+            logging.exception('Unable to retrieve reviews from database.')
+        else:
+            return result.fetchmany(count)
+
+def create_review_table(db):
+    cursor = db.cursor();
+    cursor.execute('''CREATE TABLE IF NOT EXISTS {} (
+        id INTEGER NOT NULL,
+        submission_id VARCHAR,
+        title VARCHAR,
+        user VARCHAR,
+        url VARCHAR,
+        subreddit VARCHAR,
+        date INTEGER,
+        score INTEGER,
+        PRIMARY KEY (id)
+    )'''.format(Review.table))
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS review ON {}(user, url)'.format(Review.table))
+    db.commit()
 
 class ReviewBot(Bot):
     def run(self):
@@ -41,18 +77,18 @@ class ReviewBot(Bot):
         logging.debug('checking latest on {0}'.format(subreddit))
         comments = self.reddit.get_comments(subreddit)
         for comment in comments:
-                if not Comment.is_parsed(comment.id):
+                if not Comment.is_parsed(comment.id, self.db):
                     self.check_triggers(comment)
-                    Comment.add(comment.id, self.db.session)
+                    Comment.add(comment.id, self.db)
         self.idle_count += 1
 
     def check_submissions(self, subreddit):
         logging.debug('checking latest posts on {0}'.format(subreddit))
         submissions = self.reddit.get_subreddit(subreddit).get_new(limit=100)
         for submission in submissions:
-            if not Submission.is_parsed(submission.id):
+            if not Submission.is_parsed(submission.id, self.db):
                 self.check_triggers(submission)
-                Submission.add(submission.id, self.db.session)
+                Submission.add(submission.id, self.db)
         self.idle_count += 1
 
     def check_messages(self):
@@ -115,16 +151,12 @@ class ReviewBot(Bot):
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
         text = ''
-        listed = []
         counter = 0
-        for subm_id, title, url, score in reviews:
+        for title, url, score in reviews:
             if counter >= self.list_limit:
                 break
-            if subm_id in listed:
-                continue
             text += '* [{0}]({1}) - **{2}**/100\n'.format(str(title), str(url), score)
             counter += 1
-            listed.append(subm_id)
         if text == '':
             text = '* Nothing here yet.\n'
         return text
@@ -134,7 +166,7 @@ class ReviewBot(Bot):
         logging.info('Adding {}\'s reviews to the database'.format(str(redditor)))
         posts = redditor.get_submitted(limit=None, sort = 'new')
         for post in posts:
-            if Review.query.filter(Review.submission_id == post.id).first():
+            if Review.find(post.id, str(redditor).lower(), self.db):
                 break
             post = self.reddit.get_submission(submission_id = post.id, comment_sort = 'old')
             review_comment = self.submission_is_review(submission = post)
@@ -146,33 +178,33 @@ class ReviewBot(Bot):
                 except:
                     logging.debug('   Warning: no score')
                     score = None
-                review = Review(
+                Review.add(
                     submission_id = post.id,
                     title = bytes(post.title, 'utf-8'),
                     user = str(post.author).lower(),
                     url = post.permalink,
                     subreddit = post.subreddit.display_name.lower(),
                     date = review_date.strftime('%Y%m%d'),
-                    score = score 
+                    score = score,
+                    db = self.db 
                 )
-                review.add(self.db.session)
-                logging.debug('Adding review ({}) to database.'.format(review.submission_id))
+                logging.debug('Adding review ({}) to database.'.format(post.id))
 
     # returns a generator with all matching reviews
     def get_reviews(self, redditor, keywords = [], sub = None):
         logging.info('Getting {}\'s {} reviews'.format(str(redditor), keywords))
         if not sub:
             sub = self.review_subs
-        reviews = Review.query.filter(Review.user == str(redditor).lower()).order_by(desc(Review.date)).all()
-        for review in reviews:
-            logging.debug(review.title)
-            title = str(review.title.decode('utf-8'))
+        reviews = Review.get(str(redditor).lower())
+        for title, url, subreddit, score in reviews:
+            logging.debug(title)
+            title = str(title.decode('utf-8'))
             lower_title = title.lower()
-            if review.subreddit in sub \
+            if subreddit in sub \
             and all([keyword.lower() in lower_title for keyword in keywords]):
-                if not review.score:
-                    review.score = '??'
-                yield (review.submission_id, title, review.url, review.score)
+                if not score:
+                    score = '??'
+                yield (title, url, score)
 
     # Check if user's submission is a review
     def submission_is_review(self, submission):
@@ -187,7 +219,7 @@ class ReviewBot(Bot):
                 try:
                     logging.debug('    {}'.format(comment.permalink))
                     if self.get_comment_class(comment = comment) == 1 and \
-                    comment.author == submission.author and len(comment) > 200:
+                    comment.author == submission.author and len(comment.body) > 200:
                         logging.debug('        contains a review')
                         return comment
                 except requests.exceptions.HTTPError as e:
@@ -219,13 +251,18 @@ class ReviewBot(Bot):
 
     # Reply - separate function for debugging purposes.
     def reply(self, post, text):
-        if isinstance(post, praw.objects.Comment):
+        '''if isinstance(post, praw.objects.Comment):
             Bot.handle_ratelimit(post.reply, text)
         elif isinstance(post, praw.objects.Submission):
-            Bot.handle_ratelimit(post.add_comment, text)
+            Bot.handle_ratelimit(post.add_comment, text)'''
         # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
-        # print()
+        print(text.encode('utf-8'))
 
-db = Database('bot.db')
-review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
-review_bot.run()
+with sqlite3.connect('bot.db') as db:
+    create_review_table(db)
+    review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
+    r = review_bot.get_reviews('FlockOnFire')
+    for title, url, score in r:
+        print(title)
+    input()
+    review_bot.run()
