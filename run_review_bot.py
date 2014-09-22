@@ -251,11 +251,11 @@ class ReviewBot(Bot):
 
     # Reply - separate function for debugging purposes.
     def reply(self, post, text):
-        '''if isinstance(post, praw.objects.Comment):
+        if isinstance(post, praw.objects.Comment):
             Bot.handle_ratelimit(post.reply, text)
         elif isinstance(post, praw.objects.Submission):
-            Bot.handle_ratelimit(post.add_comment, text)'''
-        # print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
+            Bot.handle_ratelimit(post.add_comment, text)
+        print('{}\n{}'.format(str(comment.author), text.encode('utf-8')))
         print(text.encode('utf-8'))
 
 with sqlite3.connect('bot.db') as db:
