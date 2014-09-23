@@ -136,6 +136,14 @@ def migration_succeeded():
         new_db_size = cursor.execute('SELECT COUNT(*) FROM {table}'.format(table=DB_TABLE)).fetchone()[0]
     return new_db_size >= old_db_size
 
+def cleanup():
+    if os.path.isfile(CSV_ARCHIVE):
+        os.remove(CSV_ARCHIVE)
+    if os.path.isfile(DB_TMP):
+        os.remove(DB_TMP)
+    if os.path.isfile(DB_BK):
+        os.remove(DB_BK)
+
 logging.basicConfig(
     filename='parser.log',
     level=logging.INFO,
@@ -146,6 +154,7 @@ logger = logging.getLogger()
 req_logger = logging.getLogger('requests')
 req_logger.propagate = False
 
+cleanup()
 download()
 tmp_db = create_tmp_db()
 with open(CSV_ARCHIVE, encoding='utf-8', mode='r') as archive:
@@ -158,8 +167,7 @@ if not migration_succeeded():
     shutil.copy(DB_BK, DB_BOT)
 else:
     logging.info('Migration successfull.')
+tmp_db.close()
 
 logging.debug('Cleaning up..')
-os.remove(DB_BK)
-os.remove(DB_TMP)
-os.remove(CSV_ARCHIVE)
+cleanup()
