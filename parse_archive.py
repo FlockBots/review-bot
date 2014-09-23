@@ -55,9 +55,9 @@ def string_to_date(date_string):
     month, day, year = pattern.findall(date_string)[0]
     if int(month) > 12:
         month, day = day, month
-    if int(month) < 10:
+    if len(month) < 2:
         month = '0{}'.format(month)
-    if int(day) < 10:
+    if len(day) < 10:
         day = '0{}'.format(day)
     if len(year) == 2:
         year = '20' + year
