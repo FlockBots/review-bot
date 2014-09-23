@@ -61,7 +61,6 @@ def string_to_date(date_string):
         day = '0{}'.format(day)
     if len(year) == 2:
         year = '20' + year
-    print('{}{}{}'.format(year, month, day))
     return '{y}{m}{d}'.format(y=year, m=month, d=day)
 
 
