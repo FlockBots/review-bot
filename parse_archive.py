@@ -6,7 +6,7 @@
 # - Test/Check if migration was successfull
 # Start Bot
 
-import os, csv, shutil, sqlite3, praw, requests, logging
+import os, csv, shutil, sqlite3, praw, requests, logging, re
 from http.cookiejar import CookieJar
 from urllib.request import build_opener, HTTPCookieProcessor
 
@@ -50,16 +50,18 @@ def create_tmp_db():
     db.commit()
     return db
 
-
-# mm/dd/yyyy or dd/mm/yyyy
+pattern = re.compile(r'(\d+)\/(\d+)\/(\d{2,4})')
 def string_to_date(date_string):
-    month = date_string[0:1]
-    day = date_string[3:4]
-    year = date_string[6:]
+    month, day, year = pattern.findall(date_string)[0]
     if int(month) > 12:
         month, day = day, month
+    if int(month) < 10:
+        month = '0{}'.format(month)
+    if int(day) < 10:
+        day = '0{}'.format(day)
     if len(year) == 2:
         year = '20' + year
+    print('{}{}{}'.format(year, month, day))
     return '{y}{m}{d}'.format(y=year, m=month, d=day)
 
 
