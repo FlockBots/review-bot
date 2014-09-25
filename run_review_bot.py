@@ -30,27 +30,27 @@ class Review():
     def find(submission_id, user, db):
         cursor = db.cursor()
         try:
-            result = cursor.execute(
+            cursor.execute(
                 'SELECT submission_id, user FROM {} WHERE submission_id = ? AND user = ?'
                 .format(Review.table), (submission_id, user)
             )
         except:
             logging.exception('Unable to perform Select query on Reviews.')
         else:
-            return result.fetchone()
+            return cursor.fetchone()
 
     @staticmethod
-    def get(user, count = 10):
+    def get(user):
         cursor = db.cursor()
         try:
-            result = cursor.execute(
+            cursor.execute(
                 'SELECT title, url, subreddit, score FROM {} WHERE user = ? ORDER BY date DESC'
                 .format(Review.table), (user,)
             )
         except:
             logging.exception('Unable to retrieve reviews from database.')
         else:
-            return result.fetchmany(count)
+            return cursor.fetchall()
 
 def create_review_table(db):
     cursor = db.cursor();

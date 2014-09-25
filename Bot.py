@@ -130,11 +130,11 @@ class Comment():
     def is_parsed(comment_id, db):
         cursor = db.cursor()
         try:
-            result = cursor.execute('SELECT id FROM {} WHERE id = ?'.format(Comment.table), (comment_id,))
+            cursor.execute('SELECT id FROM {} WHERE id = ?'.format(Comment.table), (comment_id,))
         except:
             logging.exception('Could not perform a SELECT query on Comments')
         else:
-            return result.fetchone()
+            return cursor.fetchone()
 
 class Submission():
     table = 'submissions'
@@ -153,8 +153,8 @@ class Submission():
     def is_parsed(submission_id, db):
         cursor = db.cursor()
         try:
-            result = cursor.execute('SELECT id FROM {} WHERE id = ?'.format(Comment.table), (submission_id,))
+            cursor.execute('SELECT id FROM {} WHERE id = ?'.format(Comment.table), (submission_id,))
         except:
             logging.exception('Could not perform a SELECT query on Submissions')
         else:
-            return result.fetchone()
+            return cursor.fetchone()
