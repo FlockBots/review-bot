@@ -166,7 +166,7 @@ class ReviewBot(Bot):
         link = 'No inventory found :('
         posts = user.get_submitted(limit=None)
         for post in posts:
-            if post.subreddit.display_name.lower() == 'whiskynetwork':
+            if post.subreddit.display_name.lower() == 'whiskyinventory':
                 link = '[{user}\'s Inventory]({permalink})'.format(user=str(user), permalink=post.permalink)
                 break
         return link
