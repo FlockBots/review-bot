@@ -58,7 +58,7 @@ def string_to_date(date_string):
             month, day = day, month
         if len(month) < 2:
             month = '0{}'.format(month)
-        if len(day) < 10:
+        if len(day) < 2:
             day = '0{}'.format(day)
         if len(year) == 2:
             year = '20' + year
