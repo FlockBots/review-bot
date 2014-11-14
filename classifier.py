@@ -26,7 +26,7 @@ y_train = 220 * [-1] + 227 * [1]
 
 clf = LinearSVC()
 clf.fit(X_train, y_train)
-
+print('[Classification] Trained bot')
 # predictions = clf.predict(X_test)
 
 # for doc, cls in zip(test_set, predictions):

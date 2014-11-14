@@ -102,9 +102,11 @@ class ReviewBot(Bot):
         self.list_limit = 10
         self.triggers = {
             '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
+            'inventory':  re.compile(r'@review_bot inventory')
         }
         self.sub_from_subscriptions = True 
-        self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
+        # self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
+        self.review_subs = ['flockbots']
         print("""
             List limit:          {0}
         """.format(self.list_limit))
@@ -120,9 +122,17 @@ class ReviewBot(Bot):
             body = post.body
         elif isinstance(post, praw.objects.Submission):
             body = post.selftext
+        
+        # Get user inventory 
+        pattern = self.triggers['inventory']
+        invMatch = pattern.search(body)
+        if invMatch:
+            reply += get_inventory(post.author)
+
+        # Get user reviews
         pattern = self.triggers['@review_bot']
         matches = pattern.findall(body)
-
+        
         # Matches contains tuples in the format:
         # (@review_bot, ' network:sub', subreddit, ' keyword', keyword)
         reply = ''
@@ -143,10 +153,21 @@ class ReviewBot(Bot):
                 sub = sub[0]
             reply += self.reply_header.format(post.author, keyword, sub)
             reply += self.list_reviews(reviews)
-        if matches:    
+
+        if matches or invMatch:    
             reply += self.reply_footer
             self.reply(post, reply)
             self.idle_count = 0
+
+    def get_inventory(user):
+        logging.info(' Getting link to {}\'s inventory', str(user))
+        link = 'No inventory found :('
+        posts = user.get_submitted(limit=None)
+        for post in posts:
+            if post.subreddit.display_name.lower() == 'whiskynetwork':
+                link = '[{user}\'s Inventory]({permalink})'.format(user=str(user), permalink=post.permalink)
+                break
+        return link
 
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
@@ -257,6 +278,8 @@ class ReviewBot(Bot):
             Bot.handle_ratelimit(post.add_comment, text)
 
 with sqlite3.connect('bot.db') as db:
+    print('[database] Creating table')
     create_review_table(db)
     review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
+    print('[Bot] Starting Bot')
     review_bot.run()
