@@ -104,7 +104,7 @@ class ReviewBot(Bot):
             '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
             'inventory':  re.compile(r'@review_bot inventory')
         }
-        self.sub_from_subscriptions = True 
+        self.sub_from_subscriptions = False #True 
         # self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
         self.review_subs = ['flockbots']
         print("""
@@ -122,12 +122,14 @@ class ReviewBot(Bot):
             body = post.body
         elif isinstance(post, praw.objects.Submission):
             body = post.selftext
-        
+       
+        reply = ''
+ 
         # Get user inventory 
         pattern = self.triggers['inventory']
         invMatch = pattern.search(body)
         if invMatch:
-            reply += get_inventory(post.author)
+            reply += self.get_inventory(post.author)
 
         # Get user reviews
         pattern = self.triggers['@review_bot']
@@ -135,8 +137,8 @@ class ReviewBot(Bot):
         
         # Matches contains tuples in the format:
         # (@review_bot, ' network:sub', subreddit, ' keyword', keyword)
-        reply = ''
         for _, _, sub, _, keyword in matches:
+            break
             if not keyword:
                 keyword = ''
             keywords = keyword.split()
@@ -154,13 +156,13 @@ class ReviewBot(Bot):
             reply += self.reply_header.format(post.author, keyword, sub)
             reply += self.list_reviews(reviews)
 
-        if matches or invMatch:    
+        if invMatch:    
             reply += self.reply_footer
             self.reply(post, reply)
             self.idle_count = 0
 
-    def get_inventory(user):
-        logging.info(' Getting link to {}\'s inventory', str(user))
+    def get_inventory(self, user):
+        logging.info('Getting link to {}\'s inventory'.format(str(user)))
         link = 'No inventory found :('
         posts = user.get_submitted(limit=None)
         for post in posts:
