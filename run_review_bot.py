@@ -101,7 +101,8 @@ class ReviewBot(Bot):
         self.reply_footer = '\n\n___\n\n[^Info](http://github.com/Chronophobe/ReviewBot)^( | Please address any remarks to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
-            '@review_bot': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
+            'list': re.compile(r'(@review_bot list)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
+            'inventory': re.compile(r'@review_bot inventory'),
         }
         self.sub_from_subscriptions = True 
         self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
@@ -120,13 +121,17 @@ class ReviewBot(Bot):
             body = post.body
         elif isinstance(post, praw.objects.Submission):
             body = post.selftext
-        pattern = self.triggers['@review_bot']
-        matches = pattern.findall(body)
+        list_pattern = self.triggers['list']
+        list_matches = list_pattern.findall(body)
+        inventory_pattern = self.triggers['inventory']
+        inventory_matches = list_pattern.search(body)
 
+        if inventory_matches:
+            reply += self.get_inventory(post.author)
         # Matches contains tuples in the format:
-        # (@review_bot, ' network:sub', subreddit, ' keyword', keyword)
+        # (@review_bot list, ' network:sub', subreddit, ' keyword', keyword)
         reply = ''
-        for _, _, sub, _, keyword in matches:
+        for _, _, sub, _, keyword in list_matches:
             if not keyword:
                 keyword = ''
             keywords = keyword.split()
@@ -143,11 +148,22 @@ class ReviewBot(Bot):
                 sub = sub[0]
             reply += self.reply_header.format(post.author, keyword, sub)
             reply += self.list_reviews(reviews)
-        if matches:    
+        if list_matches or inventory_matches:    
             reply += self.reply_footer
             self.reply(post, reply)
+            # print(reply)
             self.idle_count = 0
 
+    # Returns the link to the /r/WhiskyInventory submission of user
+    def get_inventory(self, user):
+        logging.info('Getting link to {}\'s inventory'.format(str(user)))
+        link = 'No inventory found :('
+        posts = user.get_submitted(limit=None)
+        for post in posts:
+            if post.subreddit.display_name.lower() == 'whiskyinventory':
+                link = '[{user}\'s Inventory]({permalink})'.format(user=str(user), permalink=post.permalink)
+                break
+        return link
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
         text = ''
