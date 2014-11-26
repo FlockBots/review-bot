@@ -91,6 +91,7 @@ class Bot:
                 time.sleep(150)
         except Exception as e:
             logging.exception('Terminating due to error')
+            sys.exit()
 
     def set_properties(self):
         self.idle_count = 0

@@ -101,8 +101,8 @@ class ReviewBot(Bot):
         self.reply_footer = '\n\n___\n\n[^Info](http://github.com/Chronophobe/ReviewBot)^( | Please address any remarks to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
-            'list': re.compile(r'(@review_bot list)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
-            'inventory': re.compile(r'@review_bot inventory'),
+            'list': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
+            'inventory': re.compile(r'@swap_bot inventory'),
         }
         self.sub_from_subscriptions = True 
         self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
@@ -126,11 +126,12 @@ class ReviewBot(Bot):
         inventory_pattern = self.triggers['inventory']
         inventory_matches = list_pattern.search(body)
 
+        reply = ''
+
         if inventory_matches:
             reply += self.get_inventory(post.author)
         # Matches contains tuples in the format:
         # (@review_bot list, ' network:sub', subreddit, ' keyword', keyword)
-        reply = ''
         for _, _, sub, _, keyword in list_matches:
             if not keyword:
                 keyword = ''
