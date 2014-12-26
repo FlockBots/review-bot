@@ -112,8 +112,8 @@ def parse(archive, db):
                 ))
             except sqlite3.IntegrityError: # skip inserting this one
                 logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=submission.permalink))
-        if counter % 100 == 0:
-            logging.debug(' | {} documents parsed.'.format(counter))
+        if counter % 250 == 0:
+            logging.info(' | {} documents parsed.'.format(counter))
     db.commit()
 
 def migrate_reviews():
