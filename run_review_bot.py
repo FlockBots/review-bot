@@ -20,14 +20,14 @@ class Review():
                  subreddit, date, score)
             )
         except sqlite3.IntegrityError: # skip inserting this one
-                logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
-                return false
+            logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
+            return False
         except:
             logging.exception('Unable to add review to database.')
-            return false
+            return False
         else:
             db.commit()
-            return true
+            return True
 
     @staticmethod
     def find(submission_id, user, db):
@@ -120,20 +120,24 @@ class ReviewBot(Bot):
     def add_review_from_comment(self, comment):
         if str(comment.author) != str(comment.submission.author):
             return 'Only the author of this submission can add reviews to the database.'
-        return self.add_review_from_submission(comment.submission)
+        else:
+            return self.add_review_from_submission(comment.submission, self.get_score(comment=comment))
 
-    def add_review_from_submission(self, submission):
-        review_date = date.fromtimestamp(review_comment.created_utc)
+    def add_review_from_submission(self, submission, score=None):
+        logging.info('Manually adding review {}'.format(submission.id))
+        review_date = date.fromtimestamp(submission.created_utc)
         if Review.add(
             submission_id = submission.id,
             title = bytes(submission.title, 'utf-8'),
-            user = str(submission.author),
-            subreddit = post.subreddit.display_name.lower(),
+            user = str(submission.author).lower(),
+            url = submission.permalink,
+            subreddit = submission.subreddit.display_name.lower(),
             date = review_date.strftime('%Y%m%d'),
-            score = score,
+            score = score or self.get_score(text=submission.selftext),
             db = self.db 
         ): return 'Submission added to database.'
-        return 'This review was probably already in my database.'
+        else:
+            return 'This review was probably already in my database.'
 
     # Check comment for triggers
     def check_triggers(self, post):
@@ -175,22 +179,12 @@ class ReviewBot(Bot):
                 sub = sub[0]
             reply += self.reply_header.format(post.author, keyword, sub)
             reply += self.list_reviews(reviews)
-        if list_matches or inventory_matches:    
+        if list_matches or add_matches:    
             reply += self.reply_footer
             self.reply(post, reply)
             # print(reply)
             self.idle_count = 0
 
-    # Returns the link to the /r/WhiskyInventory submission of user
-    def get_inventory(self, user):
-        logging.info('Getting link to {}\'s inventory'.format(str(user)))
-        link = 'No inventory found :('
-        posts = user.get_submitted(limit=None)
-        for post in posts:
-            if post.subreddit.display_name.lower() == 'whiskyinventory':
-                link = '[{user}\'s Inventory]({permalink})'.format(user=str(user), permalink=post.permalink)
-                break
-        return link
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
         text = ''
@@ -216,11 +210,7 @@ class ReviewBot(Bot):
             if review_comment:
                 logging.info('Found review: {}'.format(review_comment.permalink))
                 review_date = date.fromtimestamp(review_comment.created_utc)
-                try:
-                     score = int(self.get_score(comment = review_comment))
-                except:
-                    logging.debug('   Warning: no score')
-                    score = None
+                score =self.get_score(comment = review_comment)
                 Review.add(
                     submission_id = post.id,
                     title = bytes(post.title, 'utf-8'),
@@ -289,8 +279,8 @@ class ReviewBot(Bot):
         pattern = re.compile(r'(\d+)[*]* ?\/ ?100')
         score = pattern.search(text)
         if score:
-            return score.group(1)
-        return ''
+            return int(score.group(1))
+        return None 
 
     # Reply - separate function for debugging purposes.
     def reply(self, post, text):
