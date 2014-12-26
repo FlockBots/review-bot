@@ -128,8 +128,10 @@ class ReviewBot(Bot):
 
         reply = ''
 
+        inventory_matches = False
+
         if inventory_matches:
-            logging.INFO(inventory_matches.group(0))
+            logging.info(inventory_matches.group(0))
             reply += self.get_inventory(post.author)
         # Matches contains tuples in the format:
         # (@review_bot list, ' network:sub', subreddit, ' keyword', keyword)

@@ -14,6 +14,7 @@ class Bot:
         requests_logger.setLevel(logging.WARNING)
 
         self.name = name
+        self.owner = 'FlockOnFire'
         self.db = database
         if self.db:
             self.prepare_database()
@@ -22,30 +23,30 @@ class Bot:
             self.reddit = self.login(from_file = from_file)
         else:
             self.reddit = self.login(username, password)
-
-        self.set_properties()
-        self.set_configurables()
-        
-        init_msg = """
-        Starting {0}...
-            Username:            {1}
-            Refresh rate:        {2}
-            Refresh rate cap:    {3}
-        """.format(self.name, str(self.reddit.user), self.refresh_rate, self.refresh_cap)
-        print(init_msg)
-
-    def set_configurables(self):
+	
         self.refresh_rate = 10
         self.refresh_cap  = 120
-        self.sub_from_subscriptions = False
+        self.sub_from_subscriptions = True
+        self.set_configurables()
+      
+        init_msg = """
+Starting {0}...
+    Username:            {1}
+    Refresh rate:        {2}
+    Refresh rate cap:    {3}
+""".format(self.name, str(self.reddit.user), self.refresh_rate, self.refresh_cap)
+        print(init_msg)
+
+        self.idle_count = 0
+        self.http_error_count = 0
+        self.reply_text = None
 
     def prepare_database(self):
         cursor = self.db.cursor()
         query = 'CREATE TABLE IF NOT EXISTS {} ({})'
-        cursor.execute(query.format(Comment.table, 'id VARCHAT NOT NULL'))
-        cursor.execute(query.format(Submission.table, 'id VARCHAT NOT NULL'))
+        cursor.execute(query.format(Comment.table, 'id VARCHAR NOT NULL'))
+        cursor.execute(query.format(Submission.table, 'id VARCHAR NOT NULL'))
         self.db.commit()
-        pass
 
     def login(self, username = None, password = None, from_file = None):
         reddit = praw.Reddit('User-Agent: {0}'.format(self.name))
@@ -60,6 +61,9 @@ class Bot:
         else:
             reddit.login()
         return reddit
+    
+    def set_configurables(self):
+        pass
 
     def check_submissions(self, subreddit):
         pass
@@ -70,12 +74,22 @@ class Bot:
     def check_messages(self):
         pass
 
+    def build_reply(self, text):
+        if self.reply_text is None:
+            self.reply_text = text
+        else:
+            self.reply_text += '\n\n'
+            self.reply_text += text
+
+    def reply(self, post):
+        Bot.handle_ratelimit(post.reply, self.reply)
+        logging.debug(self.reply_text)
+        self.reply_text = None
+
     def loop(self):
         try:
             if self.sub_from_subscriptions:
                 self.subreddits = [sub.display_name for sub in self.reddit.get_my_subreddits()]
-            else:
-                self.subreddits = ['FlockBots']
             for sub in self.subreddits:
                 self.check_comments(sub)
                 self.check_submissions(sub)
@@ -91,11 +105,8 @@ class Bot:
                 time.sleep(150)
         except Exception as e:
             logging.exception('Terminating due to error')
+            self.reddit.send_message(self.owner, 'Bot Down', 'Terminal Exception Occurred')
             sys.exit()
-
-    def set_properties(self):
-        self.idle_count = 0
-        self.http_error_count = 0
 
     @staticmethod
     def sleep_time(n, y_min, y_max, speed = 3):
@@ -144,7 +155,7 @@ class Submission():
     def add(submission_id, db):
         cursor = db.cursor()
         try:
-            cursor.execute('INSERT INTO {} VALUES (?)'.format(Comment.table), (submission_id,))
+            cursor.execute('INSERT INTO {} VALUES (?)'.format(Submission.table), (submission_id,))
         except:
             logging.exception('Could not add submission to database.')
         else:
@@ -154,7 +165,7 @@ class Submission():
     def is_parsed(submission_id, db):
         cursor = db.cursor()
         try:
-            cursor.execute('SELECT id FROM {} WHERE id = ?'.format(Comment.table), (submission_id,))
+            cursor.execute('SELECT id FROM {} WHERE id = ?'.format(Submission.table), (submission_id,))
         except:
             logging.exception('Could not perform a SELECT query on Submissions')
         else:
