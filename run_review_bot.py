@@ -124,11 +124,13 @@ class ReviewBot(Bot):
             return 'Only the author of this submission can add reviews to the database.'
         if community_review:
             author = comment.author
+            url = comment.permalink
         else:
             author = None
-        return self.add_review_from_submission(comment.submission, score=self.get_score(comment=comment), author=author)
+            url = None
+        return self.add_review_from_submission(comment.submission, score=self.get_score(comment=comment), author=author, url=url)
 
-    def add_review_from_submission(self, submission, score=None, author=None):
+    def add_review_from_submission(self, submission, score=None, author=None, url=None):
         logging.info('Manually adding review {}'.format(submission.id))
         review_date = date.fromtimestamp(submission.created_utc)
         author = author or submission.author
@@ -136,7 +138,7 @@ class ReviewBot(Bot):
             submission_id = submission.id,
             title = bytes(submission.title, 'utf-8'),
             user = str(author),
-            url = submission.permalink,
+            url = url or submission.permalink,
             subreddit = submission.subreddit.display_name.lower(),
             date = review_date.strftime('%Y%m%d'),
             score = score or self.get_score(submission.selftext),
