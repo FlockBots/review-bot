@@ -147,8 +147,7 @@ class ReviewBot(Bot):
 
         list_pattern = self.triggers['list']
         list_matches = list_pattern.findall(body)
-        inventory_pattern = self.triggers['inventory']
-        inventory_matches = list_pattern.search(body)
+
         add_pattern = self.triggers['add']
         add_matches = add_pattern.search(body)
 
@@ -157,10 +156,6 @@ class ReviewBot(Bot):
         if add_matches:
             reply += addfn(post)
             reply += '\n\n'
-
-        if inventory_matches:
-            logging.INFO(inventory_matches.group(0))
-            reply += self.get_inventory(post.author)
         # Matches contains tuples in the format:
         # (@review_bot list, ' network:sub', subreddit, ' keyword', keyword)
         for _, _, sub, _, keyword in list_matches:
