@@ -104,7 +104,7 @@ class ReviewBot(Bot):
         self.reply_footer = '\n\n___\n\n[^Info](http://github.com/Chronophobe/ReviewBot)^( | Please address any remarks to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
-            'list': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
+            'list': re.compile(r'(@review_bot(?! (add|archive)))( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
             'add': re.compile(r'(@review_bot (add|archive))'),
         }
         self.sub_from_subscriptions = True 
