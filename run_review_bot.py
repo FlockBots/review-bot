@@ -21,10 +21,13 @@ class Review():
             )
         except sqlite3.IntegrityError: # skip inserting this one
                 logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
+                return false
         except:
             logging.exception('Unable to add review to database.')
+            return false
         else:
             db.commit()
+            return true
 
     @staticmethod
     def find(submission_id, user, db):
@@ -102,7 +105,7 @@ class ReviewBot(Bot):
         self.list_limit = 10
         self.triggers = {
             'list': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
-            'inventory': re.compile(r'@swap_bot inventory'),
+            'add': re.compile(r'(@review_bot (add|archive))'),
         }
         self.sub_from_subscriptions = True 
         self.review_subs = ['scotch', 'bourbon', 'worldwhisky']
@@ -114,19 +117,46 @@ class ReviewBot(Bot):
         Bot.set_properties(self)
         self.refresh_cap = 30
 
+    def add_review_from_comment(self, comment):
+        if str(comment.author) != str(comment.submission.author):
+            return 'Only the author of this submission can add reviews to the database.'
+        return self.add_review_from_submission(comment.submission)
+
+    def add_review_from_submission(self, submission):
+        review_date = date.fromtimestamp(review_comment.created_utc)
+        if Review.add(
+            submission_id = submission.id,
+            title = bytes(submission.title, 'utf-8'),
+            user = str(submission.author),
+            subreddit = post.subreddit.display_name.lower(),
+            date = review_date.strftime('%Y%m%d'),
+            score = score,
+            db = self.db 
+        ): return 'Submission added to database.'
+        return 'This review was probably already in my database.'
+
     # Check comment for triggers
     def check_triggers(self, post):
         body = ''
         if isinstance(post, praw.objects.Comment):
             body = post.body
+            addfn = self.add_review_from_comment
         elif isinstance(post, praw.objects.Submission):
             body = post.selftext
+            addfn = self.add_review_from_submission
+
         list_pattern = self.triggers['list']
         list_matches = list_pattern.findall(body)
         inventory_pattern = self.triggers['inventory']
         inventory_matches = list_pattern.search(body)
+        add_pattern = self.triggers['add']
+        add_matches = add_pattern.search(body)
 
         reply = ''
+
+        if add_matches:
+            reply += addfn(post)
+            reply += '\n\n'
 
         if inventory_matches:
             logging.INFO(inventory_matches.group(0))
