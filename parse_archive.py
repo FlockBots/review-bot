@@ -16,7 +16,7 @@ DB_BOT = 'bot.db'
 DB_BK = 'data.bk'
 DB_TABLE = 'reviews'
 CSV_ARCHIVE = 'archive.csv'
-ARCHIVE_KEY = '0AsnkEzAVwhUVdF91M3R1NFdvQWYwY1JEeHNpNnZCbVE'
+ARCHIVE_KEY = '1X1HTxkI6SqsdpNSkSSivMzpxNT-oeTbjFFDdEkXD30o'
 # # # END CONFIG
 
 def download():
@@ -71,7 +71,7 @@ def parse(archive, db):
     logging.info('Parsing Archive.')
     cursor = db.cursor()
     r = praw.Reddit('Whisky Archive Parser by /u/FlockOnFire')
-    reader = csv.reader(archive)
+    reader = csv.reader(archive, delimiter=',')
     counter = -1
     retry = 0
     for row in reader:
@@ -156,20 +156,21 @@ logger = logging.getLogger()
 req_logger = logging.getLogger('requests')
 req_logger.propagate = False
 
-cleanup()
-download()
-tmp_db = create_tmp_db()
-with open(CSV_ARCHIVE, encoding='utf-8', mode='r') as archive:
-    parse(archive, tmp_db)
-shutil.copy(DB_BOT, DB_BK)
-migrate_reviews()
-if not migration_succeeded():
-    logging.error('Migration was not successfull: too little rows in new table.\nRecovering previous database.')
-    os.remove(DB_BOT)
-    shutil.copy(DB_BK, DB_BOT)
-else:
-    logging.info('Migration successfull.')
-tmp_db.close()
+if __name__ == '__main__':
+    cleanup()
+    download()
+    tmp_db = create_tmp_db()
+    with open(CSV_ARCHIVE, encoding='utf-8', mode='r') as archive:
+        parse(archive, tmp_db)
+    shutil.copy(DB_BOT, DB_BK)
+    migrate_reviews()
+    if not migration_succeeded():
+        logging.error('Migration was not successfull: too little rows in new table.\nRecovering previous database.')
+        os.remove(DB_BOT)
+        shutil.copy(DB_BK, DB_BOT)
+    else:
+        logging.info('Migration successfull.')
+    tmp_db.close()
 
-logging.debug('Cleaning up..')
-cleanup()
+    logging.debug('Cleaning up..')
+    cleanup()
