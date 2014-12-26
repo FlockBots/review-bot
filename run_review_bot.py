@@ -130,13 +130,14 @@ class ReviewBot(Bot):
 
     def add_review_from_submission(self, submission, score=None, author=None):
         logging.info('Manually adding review {}'.format(submission.id))
-        review_date = date.fromtimestamp(review_comment.created_utc)
+        review_date = date.fromtimestamp(submission.created_utc)
         author = author or submission.author
         if Review.add(
             submission_id = submission.id,
             title = bytes(submission.title, 'utf-8'),
             user = str(author),
-            subreddit = post.subreddit.display_name.lower(),
+            url = submission.permalink,
+            subreddit = submission.subreddit.display_name.lower(),
             date = review_date.strftime('%Y%m%d'),
             score = score or self.get_score(submission.selftext),
             db = self.db 
