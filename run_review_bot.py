@@ -119,7 +119,7 @@ class ReviewBot(Bot):
 
     def add_review_from_comment(self, comment):
         same_author = str(comment.author) != str(comment.submission.author)
-        community_review = 'community' in comment.submission.title.split()
+        community_review = 'community' in comment.submission.title.lower().split()
         if same_author and not community_review:
             return 'Only the author of this submission can add reviews to the database.'
         if community_review:
