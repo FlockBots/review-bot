@@ -72,48 +72,51 @@ def parse(archive, db):
     cursor = db.cursor()
     r = praw.Reddit('Whisky Archive Parser by /u/FlockOnFire')
     reader = csv.reader(archive, delimiter=',')
-    counter = -1
+    counter = 0
     retry = 0
     for row in reader:
-        counter += 1
-        if counter < 1:
-            continue
-        user = row[2]
+        try:
+            counter += 1
+            if counter <= 1:
+                continue
+            user = row[2]
 
-        # Fix url
-        if row[3][0] != 'h':
-            if row[3][0] != 'w':
-                row[3] = 'www.' + row[3]
-            row[3] = 'http://' + row[3]
-        row[3] = row[3].replace('http://reddit', 'http://www.reddit')
+            # Fix url
+            if row[3][0] != 'h':
+                if row[3][0] != 'w':
+                    row[3] = 'www.' + row[3]
+                row[3] = 'http://' + row[3]
+            row[3] = row[3].replace('http://reddit', 'http://www.reddit')
 
-        try: # get submission object from url
-            submission = r.get_submission(row[3])
-        except requests.exceptions.HTTPError:
-            # retry once
-            if retry > 0:
-                retry = 0
-                logging.error('Unable to request {0}'.format(row[3]))
-            else:
-                counter -= 1
-                logging.warning('Retrying to request {0}'.format(row[3]))
-        else: # if submission object is received
-            review_date = string_to_date(row[5])
-            score = row[6]
-            try:
-                cursor.execute('INSERT INTO {table} VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)'.format(table=DB_TABLE), (
-                    submission.id,
-                    submission.title.encode('utf-8'),
-                    user.lower(),
-                    submission.permalink,
-                    submission.subreddit.display_name.lower(),
-                    review_date,
-                    score
-                ))
-            except sqlite3.IntegrityError: # skip inserting this one
-                logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=submission.permalink))
-        if counter % 250 == 0:
-            logging.info(' | {} documents parsed.'.format(counter))
+            try: # get submission object from url
+                submission = r.get_submission(row[3])
+            except requests.exceptions.HTTPError:
+                # retry once
+                if retry > 0:
+                    retry = 0
+                    logging.error('Unable to request {0}'.format(row[3]))
+                else:
+                    counter -= 1
+                    logging.warning('Retrying to request {0}'.format(row[3]))
+            else: # if submission object is received
+                review_date = string_to_date(row[5])
+                score = row[6]
+                try:
+                    cursor.execute('INSERT INTO {table} VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)'.format(table=DB_TABLE), (
+                        submission.id,
+                        submission.title.encode('utf-8'),
+                        user.lower(),
+                        submission.permalink,
+                        submission.subreddit.display_name.lower(),
+                        review_date,
+                        score
+                    ))
+                except sqlite3.IntegrityError: # skip inserting this one
+                    logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=submission.permalink))
+            if counter % 250 == 0:
+                logging.info(' | {} documents parsed.'.format(counter))
+        except:
+            logging.exception('Cannot parse row {}'.format(counter))
     db.commit()
 
 def migrate_reviews():
