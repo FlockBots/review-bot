@@ -20,16 +20,6 @@ class Review():
                  subreddit, date, score)
             )
         except sqlite3.IntegrityError: # skip inserting this one
-<<<<<<< HEAD
-                logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
-                return false
-        except:
-            logging.exception('Unable to add review to database.')
-            return false
-        else:
-            db.commit()
-            return true
-=======
             logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
             return False
         except:
@@ -38,7 +28,6 @@ class Review():
         else:
             db.commit()
             return True
->>>>>>> a525b56b437ef934960a3b2ff8da5048341c104a
 
     @staticmethod
     def find(submission_id, user, db):
