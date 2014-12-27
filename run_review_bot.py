@@ -299,5 +299,5 @@ class ReviewBot(Bot):
 
 with sqlite3.connect('bot.db') as db:
     create_review_table(db)
-    review_bot = ReviewBot('Review_Bot 2.2 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
+    review_bot = ReviewBot('Review_Bot 3.0 by /u/FlockOnFire', 'review.log', from_file='login.cred', database=db)
     review_bot.run()
