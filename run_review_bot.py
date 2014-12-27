@@ -20,6 +20,7 @@ class Review():
                  subreddit, date, score)
             )
         except sqlite3.IntegrityError: # skip inserting this one
+<<<<<<< HEAD
                 logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
                 return false
         except:
@@ -28,6 +29,16 @@ class Review():
         else:
             db.commit()
             return true
+=======
+            logging.debug('URL already in database for this user. Skipping insertion.\n({user},{url})'.format(user=user, url=url))
+            return False
+        except:
+            logging.exception('Unable to add review to database.')
+            return False
+        else:
+            db.commit()
+            return True
+>>>>>>> a525b56b437ef934960a3b2ff8da5048341c104a
 
     @staticmethod
     def find(submission_id, user, db):
@@ -104,7 +115,7 @@ class ReviewBot(Bot):
         self.reply_footer = '\n\n___\n\n[^Info](http://github.com/Chronophobe/ReviewBot)^( | Please address any remarks to /u/FlockOnFire)'
         self.list_limit = 10
         self.triggers = {
-            'list': re.compile(r'(@review_bot)( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
+            'list': re.compile(r'(@review_bot(?! (add|archive)))( (scotch|bourbon|worldwhisky))?( [\`\'\"]([a-z0-9_\ -]+)[\`\'\"])?', re.I),
             'add': re.compile(r'(@review_bot (add|archive))'),
         }
         self.sub_from_subscriptions = True 
@@ -126,9 +137,10 @@ class ReviewBot(Bot):
             author = comment.author
         else:
             author = None
-        return self.add_review_from_submission(comment.submission, author)
+        return self.add_review_from_submission(comment.submission, score=self.get_score(comment=comment), author=author)
 
-    def add_review_from_submission(self, submission, author=None):
+    def add_review_from_submission(self, submission, score=None, author=None):
+        logging.info('Manually adding review {}'.format(submission.id))
         review_date = date.fromtimestamp(review_comment.created_utc)
         author = author or submission.author
         if Review.add(
@@ -137,7 +149,7 @@ class ReviewBot(Bot):
             user = str(author),
             subreddit = post.subreddit.display_name.lower(),
             date = review_date.strftime('%Y%m%d'),
-            score = score,
+            score = score or self.get_score(submission.selftext),
             db = self.db 
         ): return 'Submission added to database.'
         return 'This review was probably already in my database.'
@@ -154,8 +166,12 @@ class ReviewBot(Bot):
 
         list_pattern = self.triggers['list']
         list_matches = list_pattern.findall(body)
+<<<<<<< HEAD
         inventory_pattern = self.triggers['inventory']
         inventory_matches = list_pattern.search(body)
+=======
+
+>>>>>>> a525b56b437ef934960a3b2ff8da5048341c104a
         add_pattern = self.triggers['add']
         add_matches = add_pattern.search(body)
 
@@ -164,10 +180,13 @@ class ReviewBot(Bot):
         if add_matches:
             reply += addfn(post)
             reply += '\n\n'
+<<<<<<< HEAD
 
         if inventory_matches:
             logging.INFO(inventory_matches.group(0))
             reply += self.get_inventory(post.author)
+=======
+>>>>>>> a525b56b437ef934960a3b2ff8da5048341c104a
         # Matches contains tuples in the format:
         # (@review_bot list, ' network:sub', subreddit, ' keyword', keyword)
         for _, _, sub, _, keyword in list_matches:
@@ -187,22 +206,12 @@ class ReviewBot(Bot):
                 sub = sub[0]
             reply += self.reply_header.format(post.author, keyword, sub)
             reply += self.list_reviews(reviews)
-        if list_matches or inventory_matches:    
+        if list_matches or add_matches:    
             reply += self.reply_footer
             self.reply(post, reply)
             # print(reply)
             self.idle_count = 0
 
-    # Returns the link to the /r/WhiskyInventory submission of user
-    def get_inventory(self, user):
-        logging.info('Getting link to {}\'s inventory'.format(str(user)))
-        link = 'No inventory found :('
-        posts = user.get_submitted(limit=None)
-        for post in posts:
-            if post.subreddit.display_name.lower() == 'whiskyinventory':
-                link = '[{user}\'s Inventory]({permalink})'.format(user=str(user), permalink=post.permalink)
-                break
-        return link
     # Generate a markdown list of review tuples (title, url)
     def list_reviews(self, reviews):
         text = ''
@@ -228,11 +237,7 @@ class ReviewBot(Bot):
             if review_comment:
                 logging.info('Found review: {}'.format(review_comment.permalink))
                 review_date = date.fromtimestamp(review_comment.created_utc)
-                try:
-                     score = int(self.get_score(comment = review_comment))
-                except:
-                    logging.debug('   Warning: no score')
-                    score = None
+                score =self.get_score(comment = review_comment)
                 Review.add(
                     submission_id = post.id,
                     title = bytes(post.title, 'utf-8'),
@@ -301,8 +306,8 @@ class ReviewBot(Bot):
         pattern = re.compile(r'(\d+)[*]* ?\/ ?100')
         score = pattern.search(text)
         if score:
-            return score.group(1)
-        return ''
+            return int(score.group(1))
+        return None 
 
     # Reply - separate function for debugging purposes.
     def reply(self, post, text):
