@@ -73,7 +73,8 @@ def parse(archive, db):
     r = praw.Reddit('Whisky Archive Parser by /u/FlockOnFire')
     reader = csv.reader(archive, delimiter=',')
     counter = 0
-    retry = 0
+    retry = 2
+    retry_counter = 0
     for row in reader:
         try:
             counter += 1
@@ -86,17 +87,17 @@ def parse(archive, db):
                 if row[3][0] != 'w':
                     row[3] = 'www.' + row[3]
                 row[3] = 'http://' + row[3]
-            row[3] = row[3].replace('http://reddit', 'http://www.reddit')
 
             try: # get submission object from url
                 submission = r.get_submission(row[3])
             except requests.exceptions.HTTPError:
                 # retry once
-                if retry > 0:
-                    retry = 0
-                    logging.error('Unable to request {0}'.format(row[3]))
+                if retry_counter >= retry
+                    retry_counter = 0
+                    logging.exception('Unable to request {0}'.format(row[3]))
                 else:
                     counter -= 1
+                    retry_counter += 1
                     logging.warning('Retrying to request {0}'.format(row[3]))
             else: # if submission object is received
                 review_date = string_to_date(row[5])
