@@ -6,7 +6,7 @@
 # - Test/Check if migration was successfull
 # Start Bot
 
-import os, csv, shutil, sqlite3, praw, requests, logging, re
+import os, csv, shutil, sqlite3, praw, requests, logging, re, argparse
 from http.cookiejar import CookieJar
 from urllib.request import build_opener, HTTPCookieProcessor
 
@@ -100,7 +100,7 @@ def parse(archive, db):
                     logging.warning('Retrying to request {0}'.format(row[3]))
             else: # if submission object is received
                 review_date = string_to_date(row[5])
-                score = row[6]
+                score = row[4]
                 try:
                     cursor.execute('INSERT INTO {table} VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)'.format(table=DB_TABLE), (
                         submission.id,
@@ -160,6 +160,11 @@ req_logger = logging.getLogger('requests')
 req_logger.propagate = False
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Download and parse the Whisky Archive. Then migrate it to the bot database.')
+    parser.add_argument('--force', '-f', action='store_true', help='Migrate the database after successfully parsing the archive even if the number of rows is less.')
+    args = parser.parse_args()
+    print(args.force)
+    input('Done Debugging')
     cleanup()
     download()
     tmp_db = create_tmp_db()
@@ -167,7 +172,7 @@ if __name__ == '__main__':
         parse(archive, tmp_db)
     shutil.copy(DB_BOT, DB_BK)
     migrate_reviews()
-    if not migration_succeeded():
+    if not migration_succeeded() and not args.force:
         logging.error('Migration was not successfull: too little rows in new table.\nRecovering previous database.')
         os.remove(DB_BOT)
         shutil.copy(DB_BK, DB_BOT)
