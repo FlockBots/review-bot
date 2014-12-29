@@ -5,7 +5,7 @@ class Bot:
     def __init__(self, name, log_file, username = None, password = None, from_file = None, database = None):
         logging.basicConfig(
             filename=log_file,
-            level=logging.DEBUG,
+            level=logging.INFO,
             format = '{asctime} | {levelname:^8} | {message}',
             style='{'
         )
