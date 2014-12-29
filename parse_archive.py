@@ -92,7 +92,7 @@ def parse(archive, db):
                 submission = r.get_submission(row[3])
             except requests.exceptions.HTTPError:
                 # retry once
-                if retry_counter >= retry
+                if retry_counter >= retry:
                     retry_counter = 0
                     logging.exception('Unable to request {0}'.format(row[3]))
                 else:
@@ -164,8 +164,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Download and parse the Whisky Archive. Then migrate it to the bot database.')
     parser.add_argument('--force', '-f', action='store_true', help='Migrate the database after successfully parsing the archive even if the number of rows is less.')
     args = parser.parse_args()
-    print(args.force)
-    input('Done Debugging')
+    if args.force:
+        logging.info('Force Migration enabled')
     cleanup()
     download()
     tmp_db = create_tmp_db()
