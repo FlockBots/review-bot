@@ -170,7 +170,7 @@ class ReviewBot(Bot):
 
         # Matches contains tuples in the format:
         # (@review_bot list, ' network:sub', subreddit, ' keyword', keyword)
-        for _, _, sub, _, keyword in list_matches:
+        for _, _, _, sub, _, keyword in list_matches:
             if not keyword:
                 keyword = ''
             keywords = keyword.split()
