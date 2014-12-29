@@ -100,7 +100,7 @@ def parse(archive, db):
                     retry_counter += 1
                     logging.warning('Retrying to request {0}'.format(row[3]))
             else: # if submission object is received
-                review_date = string_to_date(row[5])
+                review_date = string_to_date(row[7])
                 score = row[4]
                 try:
                     cursor.execute('INSERT INTO {table} VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)'.format(table=DB_TABLE), (
