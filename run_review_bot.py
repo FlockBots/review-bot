@@ -143,7 +143,7 @@ class ReviewBot(Bot):
             date = review_date.strftime('%Y%m%d'),
             score = score or self.get_score(submission.selftext),
             db = self.db 
-        ): return 'Submission added to database.'
+        ): return 'Submission added to database (but not yet archived in the official Whisky Review Archive, please do so manually).'
         return 'This review was probably already in my database.'
 
     # Check comment for triggers
