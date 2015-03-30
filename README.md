@@ -11,7 +11,7 @@ Below are the commands Review_Bot looks for in the comments. All commands are ca
     @review_bot add|archive
 
 Adds the submission (review) to the bot his database.  
-**IMPORT:** Does *not* add the review to the Whisky Archive!
+**IMPORTANT:** Does *not* add the review to the Whisky Archive!
 
 ### Generic Listing
     @review_bot
