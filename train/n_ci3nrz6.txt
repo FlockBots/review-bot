@@ -1,1 +1,0 @@
-i'm running untargeted analyses using lc/ms/ms (c18 mostly, might do some hilic at some point in the future) and gc/ms - this video was for a contest to explain my research to a non-scientist audience, so i decided not to go into depth on things like targeted vs untargeted analysis, as i felt that was the less-exciting part for a non-scientist.  good question!

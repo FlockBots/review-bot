@@ -1,4 +1,0 @@
-untargeted flavor analysis is still a pretty new field, and most people stop at prediction or discriminating between samples.  this thesis from a past lab member does a very good job with discussing predictions and correlating chemical data to sensory effects (note: very long) http://conservancy.umn.edu/bitstream/110104/1/charve_umn_0130e_11965.pdf
-
-and this recent paper covers discriminating between different types of whisky/different ages/different producers:
-http://www.sciencedirect.com/science/article/pii/s0308814614006682
