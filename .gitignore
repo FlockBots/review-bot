@@ -3,3 +3,4 @@ config/
 bin/
 include/
 lib/
+man/
