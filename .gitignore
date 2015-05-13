@@ -4,3 +4,4 @@ bin/
 include/
 lib/
 man/
+__pycache__/
