@@ -6,7 +6,7 @@ from helpers import Singleton
 import logging
 
 class Bot(metaclass=Singleton):
-    def __init__(self, reddit, database, footer):
+    def __init__(self, reddit, database, footer=''):
         self.regex_callbacks = {}
         self.reddit = reddit
         self.database = database
