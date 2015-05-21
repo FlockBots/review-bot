@@ -13,36 +13,17 @@ class Bot(metaclass=Singleton):
         self.footer = footer
         self.reply_text = None
 
-    def check_comments(self, subreddit):
-        """ Get the latest comments on a subreddit 
-            and check for callback triggers.
+    def check_mentions(self):
+        """ Get the latest mentions and check for callback triggers.
 
             Args:
                 subreddit: (string) name of the subreddit to check
         """
-        comments = self.reddit.get_comments(subreddit)
-        for comment in comments:
-            if self.database.get_editable(comment):
-                continue
-            editable = Editable(comment)
+        for editable in self.reddit.get_mentions():
+            editable = Editable(editable)
             self.check_callbacks(editable)
-            self.database.store_editable(comment)
+            editable.mark_as_read()
 
-    def check_submissions(self, subreddit):
-        """ Get the latest submission on a subreddit
-            and check for callback triggers.
-
-            Args:
-                subreddit: (string) name of the subreddit to check 
-        """
-        subreddit = self.reddit.get_subreddit(subreddit)
-        submissions = subreddit.get_new(limit=100)
-        for submission in submissions:
-            if self.database.get_editable(submission):
-                continue
-            editable = Editable(submission)
-            self.check_callbacks(editable)
-            self.database.store_editable(submission)
 
     def check_messages(self, mark_read=False):
         """ Get the users unread check_messages 

@@ -34,8 +34,6 @@ def run():
     bot = Bot(reddit, database, footer='')
 
     while True:
-        for subreddit in info['subreddits']:
-            bot.check_comments(subreddit)
-            bot.check_submissions(subreddit)
+        bot.check_mentions()
         bot.check_messages()
         time.sleep(60)
