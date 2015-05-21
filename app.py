@@ -34,6 +34,5 @@ def run():
     bot = Bot(reddit, database, footer='')
 
     while True:
-        bot.check_mentions()
         bot.check_messages()
         time.sleep(60)

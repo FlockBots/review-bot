@@ -13,18 +13,6 @@ class Bot(metaclass=Singleton):
         self.footer = footer
         self.reply_text = None
 
-    def check_mentions(self):
-        """ Get the latest mentions and check for callback triggers.
-
-            Args:
-                subreddit: (string) name of the subreddit to check
-        """
-        for editable in self.reddit.get_mentions():
-            editable = Editable(editable)
-            self.check_callbacks(editable)
-            editable.mark_as_read()
-
-
     def check_messages(self, mark_read=False):
         """ Get the users unread check_messages 
             and check for callback triggers.
@@ -32,14 +20,14 @@ class Bot(metaclass=Singleton):
             Args:
                 mark_read: (bool) if True, mark the messages as read
         """
-        messages = self.reddit.get_unread(unset_has_mail=mark_read, limit=100)
+        messages = self.reddit.get_unread(unset_has_mail=mark_read)
         for message in messages:
             if self.database.get_editable(message):
                 continue
             editable = Editable(message)
 
             # if a callback was made, mark as read.
-            if(self.check_callbacks(editable)):
+            if(self.check_callbacks(editable) or mark_read):
                 message.mark_as_read()
             self.database.store_editable(editable)
 
