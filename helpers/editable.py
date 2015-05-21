@@ -13,7 +13,7 @@ class Editable:
         self.original  = editable
         self.id        = editable.id
         self.author    = editable.author
-        self.permalink  = editable.permalink
+        self.permalink = editable.permalink
         if isinstance(editable, praw.objects.Comment):
             self._set_comment_properties(editable)
         elif isinstance(editable, praw.objects.Submission):
