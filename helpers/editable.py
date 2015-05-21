@@ -13,6 +13,7 @@ class Editable:
         self.original  = editable
         self.id        = editable.id
         self.author    = editable.author
+        self.permalink  = editable.permalink
         if isinstance(editable, praw.objects.Comment):
             self._set_comment_properties(editable)
         elif isinstance(editable, praw.objects.Submission):
@@ -26,7 +27,6 @@ class Editable:
         self.reply = editable.reply
         self.text  = editable.body
         self.type  = Editable.Comment
-        self.permalink  = editable.permalink
         self.submission = editable.submission
         self.subreddit  = editable.subreddit
 
@@ -34,7 +34,6 @@ class Editable:
         self.reply = editable.add_comment
         self.text  = editable.self_text
         self.type  = Editable.Submission
-        self.permalink  = editable.permalink
         self.submission = self.original
         self.subreddit  = editable.subreddit
 
@@ -42,7 +41,6 @@ class Editable:
         self.reply = editable.reply
         self.text  = editable.body
         self.type  = Editable.Message
-        self.permalink  = editable.permalink
         self.submission = None
-        self.subreddit  = editable.subreddit 
+        self.subreddit  = None
 
