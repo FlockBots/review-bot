@@ -34,5 +34,5 @@ def run():
     bot = Bot(reddit, database, footer='')
 
     while True:
-        bot.check_messages()
+        bot.check_messages(mark_read=True)
         time.sleep(60)
