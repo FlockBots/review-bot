@@ -37,8 +37,11 @@ class Bot(metaclass=Singleton):
             if self.database.get_editable(message):
                 continue
             editable = Editable(message)
-            self.check_callbacks(editable)
-            self.database.store_editable(message)
+
+            # if a callback was made, mark as read.
+            if(self.check_callbacks(editable)):
+                message.mark_as_read()
+            self.database.store_editable(editable)
 
     def check_callbacks(self, editable):
         """ Iterates over registered callbacks 
@@ -49,14 +52,20 @@ class Bot(metaclass=Singleton):
 
             Args:
                 editable: (helper.Editable) the editable to check for triggers
+            Returns:
+                True, when a callback was triggered
+                False, otherwise
         """
+        has_callback = False
         for regex, functions in self.regex_callbacks.items():
             string = editable.text
             match = re.match(regex, string)
             if match:
+                has_callback = True
                 for callback in functions:
                     callback(editable, match)
         self.reply(editable)
+        return has_callback
 
     def register_regex(self, regex):
         """ Decorator to register callbacks """
