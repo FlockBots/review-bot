@@ -7,28 +7,33 @@ It lists up to 10 of the caller's latest reviews in the /r/Whisky network. Speci
 ## Commands
 Below are the commands Review_Bot looks for in the comments. All commands are case-insensitive.
 
-### Generic
+### Add Review to Database
+    @review_bot add
+
+Adds the submission (review) to the bot his database.  
+**IMPORTANT:** Does *not* add the review to the Whisky Archive!
+
+### Generic Listing
     @review_bot
 
 Lists up to 10 of the user's reviews across the /r/Whisky network.
 
-### Keyworded
+### Keyworded Listing
     @review_bot 'Caol Ila'
 
 or
 
     @review_bot "Caol Ila"
 
-Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Ila'. 
+Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Ila'.  
 The order doesn't matter and as stated above the search is case insensitive.
 
-
-### Per subreddit
+### Per subreddit Listing
     @review_bot scotch|bourbon|worldwhisky
 
 Lists up to 10 of the user's reviews from just one subreddit (/r/Scotch, /r/Bourbon *or* /r/WorldWhisky)
 
-### Combined
+### Combined Listing
     @review_bot scotch|bourbon|worldwhisky 'Caol Ila'
 
 Lists up to 10 of the user's reviews which titles contain the phrase 'Caol Isla' from one subreddit.
