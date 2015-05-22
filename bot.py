@@ -95,13 +95,10 @@ class Bot(metaclass=Singleton):
                 editable: (helper.Editable) the editable to reply to
                 text: (string) markdown message to put in the comment
         """
-        if not text:
-            text = self.reply_text
-        if not self.reply_text:
-            return
-        text += self.footer
-        logging.debug('Reply {id}: {msg}'.format(id=editable.id, msg=text))
-        editable.reply(text)
+        self.build_reply(text)
+        self.reply_text += self.footer
+        logging.debug('Reply {id}: {msg}'.format(id=editable.id, msg=self.reply_text))
+        editable.reply(self.reply_text)
         self.reply_text = ''
 
     def __repr__(self):
