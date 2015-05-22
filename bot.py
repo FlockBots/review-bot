@@ -14,7 +14,7 @@ class Bot(metaclass=Singleton):
         self.reply_text = None
 
     def check_messages(self, mark_read=False):
-        """ Get the users unread check_messages 
+        """ Get the users unread messages 
             and check for callback triggers.
 
             Args:
