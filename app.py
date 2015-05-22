@@ -14,12 +14,13 @@ def set_logging(log_filename, level=logging.INFO):
     logging.basicConfig(
         filename=log_filename,
         level=logging.INFO,
-        format = '{asctime} | {name:<8.8} | {levelname:<8.8} | {message}',
+        format='{asctime} | {name:<8.8} | {levelname:<8.8} | {message}',
         style='{'
     )
     logging.getLogger().addHandler(logging.StreamHandler())
     requests_logger = logging.getLogger('requests')
     requests_logger.setLevel(logging.WARNING)
+
 
 def run():
     if len(sys.argv) > 1 and sys.argv[1] == 'debug':

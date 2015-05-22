@@ -1,5 +1,6 @@
 import praw
 
+
 class Editable:
     """ 
     Helper class to contain similar attributes for PRAW comments and submission
@@ -43,4 +44,3 @@ class Editable:
         self.type  = Editable.Message
         self.submission = None
         self.subreddit  = None
-

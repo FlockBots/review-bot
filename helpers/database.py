@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class Database:
 
     comment_table = 'editables'
@@ -20,7 +21,7 @@ class Database:
         cursor.close()
 
     def store_editable(self, editable):
-        """ Stores the editable id in the database 
+        """ Stores the editable id in the database
 
         To prevent the bot from revisiting comments,
         save the parsed editable id in the database.

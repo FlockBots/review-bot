@@ -1,18 +1,20 @@
 from bot import Bot
 
-bot = Bot() # Singleton, requires to be initialised before
+bot = Bot()  # Singleton, requires to be initialised before
 
 # Register function below
 # @bot.register_regex(r'my_regex')   -   Fires function if comment/submission matches regex
 # @bot.make_reply                    -   Creates a reply using the returned string
 # def callback(editable, match): pass    The callback receives the editable (comment, submission, message) and the matching phrase
 
+
 @bot.register_regex(r'@review_bot ')
 @bot.make_reply
 def list_reviews(editable, match):
     pass
 
-def _get_reviews(bottle=None, keyword=None, subreddit=None)
+
+def _get_reviews(bottle=None, keyword=None, subreddit=None):
     ''' Get all reviews of a user.
 
         Args:

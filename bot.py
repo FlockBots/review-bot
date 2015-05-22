@@ -5,6 +5,7 @@ from helpers import Editable
 from helpers import Singleton
 import logging
 
+
 class Bot(metaclass=Singleton):
     def __init__(self, reddit, database, footer=''):
         self.regex_callbacks = {}
@@ -14,7 +15,7 @@ class Bot(metaclass=Singleton):
         self.reply_text = None
 
     def check_messages(self, mark_read=False):
-        """ Get the users unread messages 
+        """ Get the users unread messages
             and check for callback triggers.
 
             Args:
@@ -32,10 +33,10 @@ class Bot(metaclass=Singleton):
             self.database.store_editable(editable)
 
     def check_callbacks(self, editable):
-        """ Iterates over registered callbacks 
+        """ Iterates over registered callbacks
 
-            If the editable contains text that triggers a registered
-            callback, it calls that functions with the editable and matched text
+            If the editable contains text that triggers a registered callback,
+            it calls that functions with the editable and matched text
             as the arguments.
 
             Args:
@@ -67,7 +68,7 @@ class Bot(metaclass=Singleton):
         return wrapper
 
     def make_reply(self, function):
-        """ Decorator to let the bot reply 
+        """ Decorator to let the bot reply
             Requires the function to return a string
         """
         def wrapper(*args, **kwargs):
@@ -89,7 +90,7 @@ class Bot(metaclass=Singleton):
 
     @rate_limited
     def reply(self, editable, text=None):
-        """ Comments on the object 
+        """ Comments on the object
 
             Args:
                 editable: (helper.Editable) the editable to reply to
@@ -97,7 +98,9 @@ class Bot(metaclass=Singleton):
         """
         self.build_reply(text)
         self.reply_text += self.footer
-        logging.debug('Reply {id}: {msg}'.format(id=editable.id, msg=self.reply_text))
+        logging.debug('Reply {id}: {msg}'.format(
+            id=editable.id, msg=self.reply_text)
+        )
         editable.reply(self.reply_text)
         self.reply_text = ''
 

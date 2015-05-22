@@ -1,6 +1,7 @@
 import praw
 import logging
 
+
 def rate_limited(function):
     def wrapper(*args, **kwargs):
         while True:
