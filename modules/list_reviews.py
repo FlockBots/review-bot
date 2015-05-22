@@ -8,9 +8,19 @@ bot = Bot()  # Singleton, requires to be initialised before
 # def callback(editable, match): pass    The callback receives the editable (comment, submission, message) and the matching phrase
 
 
-@bot.register_regex(r'@review_bot ')
+@bot.register_regex(r'''(/u/review_bot list)( (scotch|bourbon|worldwhisky))?( [`'"]([a-z0-9_\ -]+)[`'"])?''')
 @bot.make_reply
 def list_reviews(editable, match):
+    ''' List reviews from a subreddit containing a certain keyword.
+
+        Args:
+            editable: The submission, message or comment containing the trigger
+            match: re.Match object containing the following groups:
+                3: the subreddit
+                5: the keyword
+        Returns: (string)
+            A markdown list of matching reviews. 
+    '''
     pass
 
 
