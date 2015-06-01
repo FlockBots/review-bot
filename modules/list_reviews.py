@@ -109,8 +109,8 @@ def _get_reviews(user, subreddit=None, bottle=None):
         match_score = _calculate_match_score(review=review, bottle=bottle)
         if match_score > 66: # 2/3th of the string matches
             best_matches.append(ScoredReview(review, match_score))
-        best_matches.sort(key=lambda sr: sr.score)
-    return (scored.review for scored in best_matches if scored.score > 80)
+    best_matches.sort(key=lambda sr: (sr.score, sr.review['date']), reverse=True)
+    return (scored.review for scored in best_matches)
 
 
 def _calculate_match_score(review, bottle):
