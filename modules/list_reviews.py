@@ -4,6 +4,7 @@ from modules import ReviewBase
 from fuzzywuzzy import fuzz
 from functools import partial
 from helpers import peek
+from collections import namedtuple
 
 bot = Bot.get_instance()  # Singleton
 
@@ -82,6 +83,9 @@ def list_reviews_bottle(editable, match):
     return reply
 
 
+ScoredReview = namedtuple('ScoredReview', ['review', 'score'])
+
+
 def _get_reviews(user, subreddit=None, bottle=None):
     ''' Get all reviews of a user.
 
@@ -137,6 +141,3 @@ def _create_review_list(reviews, max_reviews=10):
         review_list += '* [{title}]({url})\n'.format(review['title'], review['permalink'])
     review_list += '\n'
     return review_list
-
-
-ScoredReview = namedtuple('ScoredReview', ['review', 'score'])
