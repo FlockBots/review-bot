@@ -5,7 +5,7 @@ from fuzzywuzzy import fuzz
 from functools import partial
 from helpers import peek
 
-bot = Bot()  # Singleton, requires to be initialised before
+bot = Bot.get_instance()  # Singleton
 
 # Register function below
 # @bot.register_regex(r'my_regex')   -   Fires function if comment/submission matches regex
