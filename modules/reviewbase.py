@@ -80,6 +80,4 @@ class ReviewBase(metaclass=Singleton):
                 '''.format(ReviewBase.TABLE),
                 (author,subreddit.lower())
             )
-
-        for row in cursor:
-            yield row
+        return cursor.fetchall()
