@@ -1,6 +1,6 @@
 import sqlite3
 from helpers import Singleton
-from decorators import cursor_op
+from helpers.decorators import cursor_op
 from collections import namedtuple
 from config import info
 
@@ -13,10 +13,6 @@ class ReviewBase(metaclass=Singleton):
         self.connection = sqlite3.connect(filename)
         self.connection.row_factory = sqlite3.Row
         self._create_table()
-
-    def _review_factory(cursor, row):
-        _, *values = *row # discard id
-        return Review(*values)
 
     @cursor_op
     def _create_table(self, cursor):
@@ -39,14 +35,17 @@ class ReviewBase(metaclass=Singleton):
         ''' Insert a new Review into the database
 
             Args:
-                review: a modules.Review tuple.
+                review: a dictionary containing the right columns (see table definition)
                 cursor: sqlite3.Cursor passed by decorator
         '''
         try:
             cursor.execute(
                 'INSERT INTO {} VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)'
                 .format(ReviewBase.TABLE),
-                (*review)
+                (
+                    review['author'], review['bottle'], review['date'], review['permalink'],
+                    review['score'], review['permalink'], review['title']
+                )
             )
         except sqlite3.IntegrityError:
             logging.info('Review ({}) already exists in database.'.format(review.permalink))
