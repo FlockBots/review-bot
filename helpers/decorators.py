@@ -24,8 +24,9 @@ def cursor_op(function):
         Decorated function should accept an argument called cursor.
     '''
     def wrapper(*args, **kwargs):
+        self, *args = args
         cursor = self.connection.cursor()
-        result = function(*args, cursor=cursor, **kwargs)
+        result = function(self, *args, cursor=cursor, **kwargs)
         cursor.close()
         return result
     return wrapper

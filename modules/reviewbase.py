@@ -27,8 +27,8 @@ class ReviewBase(metaclass=Singleton):
             title VARCHAR NOT NULL,
             PRIMARY KEY (id)
         )'''.format(ReviewBase.TABLE))
-        cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS review ON {}(user, url)'.format(ReviewBase.table))
-        db.commit()
+        cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS review ON {}(author, permalink)'.format(ReviewBase.TABLE))
+        self.connection.commit()
 
     @cursor_op
     def insert(self, review, cursor):
