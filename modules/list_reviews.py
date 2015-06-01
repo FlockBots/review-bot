@@ -1,4 +1,9 @@
 from bot import Bot
+from config import info
+from modules import ReviewBase
+from fuzzywuzzy import fuzz
+from functools import partial
+from helpers import peek
 
 bot = Bot()  # Singleton, requires to be initialised before
 
@@ -8,31 +13,130 @@ bot = Bot()  # Singleton, requires to be initialised before
 # def callback(editable, match): pass    The callback receives the editable (comment, submission, message) and the matching phrase
 
 
-@bot.register_regex(r'''(/u/review_bot list)( (scotch|bourbon|worldwhisky))?( [`'"]([a-z0-9_\ -]+)[`'"])?''')
+@bot.register_regex(r'/u/review_bot list')
 @bot.make_reply
 def list_reviews(editable, match):
     ''' List reviews from a subreddit containing a certain keyword.
 
         Args:
             editable: The submission, message or comment containing the trigger
-            match: re.Match object containing the following groups:
-                3: the subreddit
-                5: the keyword
+            match: re.Match object
         Returns: (string)
-            A markdown list of matching reviews. 
+            A markdown list of matching reviews.
     '''
-    pass
+
+    reviews = _get_reviews(user=editable.author)
+
+    if peek(reviews):
+        reply = "{user}'s latest reviews:\n\n".format(user=editable.author)
+        reply += _create_review_list(reviews)
+    else:
+        reply  = "I can't find a single review under your name. :(\n\n"
+    return reply
 
 
-def _get_reviews(bottle=None, keyword=None, subreddit=None):
+@bot.register_regex(r'/u/review_bot ({subs})'.format(subs='|'.join(info['review_subs'])))
+@bot.make_reply
+def list_reviews_subreddit(editable, match):
+    ''' List most recent reviews from subreddit
+
+        Args:
+            editable: The submission, message or comment containing the trigger
+            match: re.Match object containing the following groups:
+                   1 - the name of the subreddit
+        Returns: (string)
+            A markdown list of matching reviews.
+    '''
+    subreddit = match.group(1).title()
+    reviews = _get_reviews(user=editable.author, subreddit=subreddit)
+
+    if peek(reviews):
+        reply = "{user}'s latest reviews in /r/{sub}:\n\n".format(user=editable.author, sub=subreddit)
+        reply += _create_review_list(reviews)
+    else:
+        reply = "You don't seem to have any reviews in /r/{sub} yet, buddy.\n\n".format(sub=subreddit)
+    return reply
+
+
+@bot.register_regex(r'''/u/review_bot [`'"]([a-zA-Z0-9_\ -]+)[`'"]''')
+@bot.make_reply
+def list_reviews_bottle(editable, match):
+    ''' List reviews about a certain bottle/brand.
+
+        Args:
+            editable: The submission, message or comment containing the trigger
+            match: re.Match object containing the following groups:
+                   1 - the name of the bottle
+        Returns: (string)
+            A markdown list of matching reviews.
+    '''
+    bottle = match.group(1)
+    reviews = _get_reviews(user=editable.author, bottle=bottle)
+
+    if peek(reviews):
+        reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author, bottle=subreddit)  
+        reply += _create_review_list(reviews)
+    else:
+        reply = "Sorry, I can't seem to find any `{bottle}` reviews by you, mate. :(\n\n".format(bottle=bottle)
+
+    return reply
+
+
+def _get_reviews(user, subreddit=None, bottle=None):
     ''' Get all reviews of a user.
 
         Args:
-            bottle: (string) Get all reviews about a certain bottle.
-            keyword: (string) Get all reviews matching the keyword
-            subreddit: (string) Get all reviews from a certain subreddit.
+            user: (string) The username
+            bottle: (string) Match criterium: reviews about bottle.
+            subreddit: ([string]) Match criterium: reviews from a certain subreddit.
 
         Returns:
-            A generator for all reviews matching the criteria.
+            A list for all reviews matching the criteria.
     '''
-    pass
+    review_db = ReviewBase()
+    reviews = review_db.select(author=user, subreddit=subreddit)
+
+    if not bottle:
+        return reviews
+
+    best_matches = []
+
+    for review in reviews:
+        match_score = _calculate_match_score(review=review, bottle=bottle)
+        if match_score > 66: # 2/3th of the string matches
+            best_matches.append(ScoredReview(review, match_score))
+        best_matches.sort(key=lambda sr: sr.score)
+    return (scored.review for scored in best_matches if scored.score > 80)
+
+
+def _calculate_match_score(review, bottle):
+    ''' Calculate the ratio in which the bottle matches the review.
+
+        Args:
+            review: modules.reviewbase.Review object to match against
+            string: string to match the Review with
+
+        Returns:
+            Score [0, 100], the higher the score the better the match
+    '''
+
+    bottle_score = 0
+    if review['bottle']:
+        bottle_score = fuzz.partial_ratio(review['bottle'].lower(), bottle.lower())
+        
+    title_score = fuzz.partial_ratio(review['title'].lower(), bottle.lower())
+    return max(bottle_score, title_score)
+
+
+def _create_review_list(reviews, max_reviews=10):
+    ''' Create a string containing links to the reviews. '''
+    review_list = ''
+    for index, review in reviews:
+        if index >= max_reviews:
+            break
+        review_list += '* [{title}]({url})\n'.format(review['title'], review['permalink'])
+    review_list += '\n'
+    return review_list
+
+
+ScoredReview = namedtuple('ScoredReview', ['review', 'score'])

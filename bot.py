@@ -3,6 +3,7 @@ import praw
 from helpers import rate_limited
 from helpers import Editable
 from helpers import Singleton
+from config import info
 import logging
 
 
@@ -11,7 +12,7 @@ class Bot(metaclass=Singleton):
         self.regex_callbacks = {}
         self.reddit = reddit
         self.database = database
-        self.footer = footer
+        self.footer = footer or "___\n^(Hey I'm a bot! Please address any remarks to {}.)".format(info['owner'])
         self.reply_text = None
 
     def check_messages(self, mark_read=False):

@@ -34,6 +34,13 @@ def run():
     database = Database(info['database_filename'])
     bot = Bot(reddit, database, footer='')
 
+    register_modules()
+
     while True:
         bot.check_messages(mark_read=True)
         time.sleep(60)
+
+
+def register_modules():
+    ''' Imports all modules that need to be registered by the Bot '''
+    from modules import list_reviews
