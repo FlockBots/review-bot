@@ -21,17 +21,23 @@ class Bot(metaclass=Singleton):
 
             Args:
                 mark_read: (bool) if True, mark the messages as read
+
+            Returns:
+                Number of messages read.
         """
         messages = self.reddit.get_unread(unset_has_mail=mark_read)
+        total_read = 0
         for message in messages:
             if self.database.get_editable(message):
                 continue
             editable = Editable(message)
 
             # if a callback was made, mark as read.
-            if(self.check_callbacks(editable) or mark_read):
+            if self.check_callbacks(editable) or mark_read:
                 message.mark_as_read()
+                total_read += 1
             self.database.store_editable(editable)
+        return total_read
 
     def check_callbacks(self, editable):
         """ Iterates over registered callbacks
