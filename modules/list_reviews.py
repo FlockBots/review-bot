@@ -5,8 +5,10 @@ from fuzzywuzzy import fuzz
 from functools import partial
 from helpers import peek
 from collections import namedtuple
+import logging
 
 bot = Bot.get_instance()  # Singleton
+logger = logging.getLogger(__name__)
 
 # Register function below
 # @bot.register_regex(r'my_regex')   -   Fires function if comment/submission matches regex
@@ -25,6 +27,7 @@ def list_reviews(editable, match):
         Returns: (string)
             A markdown list of matching reviews.
     '''
+    logger.debug('Listing reviews by {} (all)'.format(editable.author))
 
     reviews = _get_reviews(user=editable.author)
 
@@ -49,6 +52,8 @@ def list_reviews_subreddit(editable, match):
             A markdown list of matching reviews.
     '''
     subreddit = match.group(1).title()
+    logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author, subreddit))
+
     reviews = _get_reviews(user=editable.author, subreddit=subreddit)
 
     if peek(reviews):
@@ -72,6 +77,8 @@ def list_reviews_bottle(editable, match):
             A markdown list of matching reviews.
     '''
     bottle = match.group(1)
+    logger.debug('Listing reviews by {} (bottle:{})'.format(editable.author, bottle))
+
     reviews = _get_reviews(user=editable.author, bottle=bottle)
 
     if peek(reviews):
@@ -97,6 +104,8 @@ def _get_reviews(user, subreddit=None, bottle=None):
         Returns:
             A list for all reviews matching the criteria.
     '''
+    logger.debug('Getting reviews (sub:{}, bottle:{}'.format(subreddit, bottle))
+
     review_db = ReviewBase()
     reviews = review_db.select(author=user, subreddit=subreddit)
 

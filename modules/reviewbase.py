@@ -3,12 +3,14 @@ from helpers import Singleton
 from helpers.decorators import cursor_op
 from collections import namedtuple
 from config import info
+import logging
 
 class ReviewBase(metaclass=Singleton):
 
     TABLE = 'reviews'
 
     def __init__(self, filename='reviews.db'):
+        self.logger = logging.getLogger(__name__)
         self.table = 'reviews'
         self.connection = sqlite3.connect(filename)
         self.connection.row_factory = sqlite3.Row
@@ -16,6 +18,7 @@ class ReviewBase(metaclass=Singleton):
 
     @cursor_op
     def _create_table(self, cursor):
+        self.logger.debug('Creating table {}'.format(ReviewBase.TABLE))
         cursor.execute('''CREATE TABLE IF NOT EXISTS {} (
             id INTEGER NOT NULL,
             author VARCHAR NOT NULL,
@@ -38,6 +41,7 @@ class ReviewBase(metaclass=Singleton):
                 review: a dictionary containing the right columns (see table definition)
                 cursor: sqlite3.Cursor passed by decorator
         '''
+        self.logger.debug('Inserting review ({title} by {author})'.format(**review))
         try:
             cursor.execute(
                 'INSERT INTO {} VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)'
@@ -48,9 +52,9 @@ class ReviewBase(metaclass=Singleton):
                 )
             )
         except sqlite3.IntegrityError:
-            logging.info('Review ({}) already exists in database.'.format(review.permalink))
+            self.logger.info('Review ({}) already exists in database.'.format(review.permalink))
         except:
-            logging.exception('Unable to add review to database.')
+            self.logger.exception('Unable to add review to database.')
         else:
             db.commit()
 
@@ -66,6 +70,7 @@ class ReviewBase(metaclass=Singleton):
             Returns:
                 A generator of reviews (dict) matching the criteria.
         '''
+        self.logger.debug('Selecting review by {} (subreddit: {}'.format(author, subreddit))
         if not subreddit:
             cursor.execute(
                 'SELECT * FROM {} WHERE author = ? ORDER BY date DESC'
