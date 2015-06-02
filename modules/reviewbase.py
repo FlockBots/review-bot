@@ -70,7 +70,7 @@ class ReviewBase(metaclass=Singleton):
             Returns:
                 A generator of reviews (dict) matching the criteria.
         '''
-        self.logger.debug('Selecting review by {} (subreddit: {}'.format(author, subreddit))
+        self.logger.debug('Selecting review by {} (subreddit: {})'.format(author, subreddit))
         if not subreddit:
             cursor.execute(
                 'SELECT * FROM {} WHERE author = ? ORDER BY date DESC'

@@ -104,7 +104,7 @@ def _get_reviews(user, subreddit=None, bottle=None):
         Returns:
             A list for all reviews matching the criteria.
     '''
-    logger.debug('Getting reviews (sub:{}, bottle:{}'.format(subreddit, bottle))
+    logger.debug('Getting reviews (sub:{}, bottle:{})'.format(subreddit, bottle))
 
     review_db = ReviewBase()
     reviews = review_db.select(author=user, subreddit=subreddit)
