@@ -14,8 +14,8 @@ bot = Bot.get_instance()  # Singleton
 # def callback(editable, match): pass    The callback receives the editable (comment, submission, message) and the matching phrase
 
 
-@bot.register_regex(r'/u/review_bot list')
 @bot.make_reply
+@bot.register_regex(r'/u/review_bot list')
 def list_reviews(editable, match):
     ''' List reviews from a subreddit containing a certain keyword.
 
@@ -36,8 +36,8 @@ def list_reviews(editable, match):
     return reply
 
 
-@bot.register_regex(r'/u/review_bot ({subs})'.format(subs='|'.join(info['review_subs'])))
 @bot.make_reply
+@bot.register_regex(r'/u/review_bot ({subs})'.format(subs='|'.join(info['review_subs'])))
 def list_reviews_subreddit(editable, match):
     ''' List most recent reviews from subreddit
 
@@ -59,8 +59,8 @@ def list_reviews_subreddit(editable, match):
     return reply
 
 
-@bot.register_regex(r'''/u/review_bot [`'"]([a-zA-Z0-9_\ -]+)[`'"]''')
 @bot.make_reply
+@bot.register_regex(r'''/u/review_bot [`'"]([a-zA-Z0-9_\ -]+)[`'"]''')
 def list_reviews_bottle(editable, match):
     ''' List reviews about a certain bottle/brand.
 
