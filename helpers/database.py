@@ -1,8 +1,9 @@
 import sqlite3
 import logging
 from helpers.decorators import cursor_op
+from helpers import Singleton
 
-class Database:
+class Database(metaclass=Singleton):
 
     comment_table = 'editables'
 
