@@ -1,8 +1,6 @@
 import sqlite3
 from helpers import Singleton
 from helpers.decorators import cursor_op
-from collections import namedtuple
-from config import info
 import logging
 
 class ReviewBase(metaclass=Singleton):
@@ -56,7 +54,7 @@ class ReviewBase(metaclass=Singleton):
         except:
             self.logger.exception('Unable to add review to database.')
         else:
-            db.commit()
+            self.connection.commit()
 
 
     @cursor_op

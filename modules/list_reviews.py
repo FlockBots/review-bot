@@ -2,7 +2,6 @@ from bot import Bot
 from config import info
 from modules import ReviewBase
 from fuzzywuzzy import fuzz
-from functools import partial
 from helpers.functions import peek
 from collections import namedtuple
 import logging
@@ -82,7 +81,7 @@ def list_reviews_bottle(editable, match):
     reviews = _get_reviews(user=editable.author, bottle=bottle)
 
     if peek(reviews):
-        reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author, bottle=subreddit)  
+        reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author, bottle=bottle)  
         reply += _create_review_list(reviews)
     else:
         reply = "Sorry, I can't seem to find any `{bottle}` reviews by you, mate. :(\n\n".format(bottle=bottle)

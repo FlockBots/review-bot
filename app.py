@@ -1,7 +1,5 @@
 import praw
-import re
 from helpers import Database
-from helpers import Editable
 from config import info
 from config import credentials
 from bot import Bot

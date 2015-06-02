@@ -1,5 +1,4 @@
 import re
-import praw
 from helpers.decorators import rate_limited
 from helpers import Editable
 from helpers import Singleton
