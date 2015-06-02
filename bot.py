@@ -14,6 +14,7 @@ class Bot(metaclass=Singleton):
         self.database = database
         self.footer = footer or "___\n^(Hey I'm a bot! Please address any remarks to {}.)".format(info['owner'])
         self.reply_text = None
+        self.logger = logging.getLogger(__name__)
 
     def check_messages(self, mark_read=False):
         """ Get the users unread messages
@@ -66,11 +67,8 @@ class Bot(metaclass=Singleton):
     def register_regex(self, regex):
         """ Decorator to register callbacks """
         def wrapper(function):
-            logging.debug('Registering callback at: ' + regex)
-            try:
-                self.regex_callbacks[regex].append(function)
-            except KeyError:
-                self.regex_callbacks[regex] = [function]
+            self.logger.debug('Registering "{fn}" at: "{regex}"'.format(fn=function.__name__, regex=regex))
+            self.regex_callbacks.get(regex, []).append(function)
             return function
         return wrapper
 
@@ -105,7 +103,7 @@ class Bot(metaclass=Singleton):
         """
         self.build_reply(text)
         self.reply_text += self.footer
-        logging.debug('Reply {id}: {msg}'.format(
+        self.logger.debug('Reply {id}: {msg}'.format(
             id=editable.id, msg=self.reply_text)
         )
         editable.reply(self.reply_text)

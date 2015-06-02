@@ -17,17 +17,19 @@ def set_logging(log_filename, level=logging.INFO):
         format='{asctime} | {name:<8.8} | {levelname:<8.8} | {message}',
         style='{'
     )
-    logging.getLogger().addHandler(logging.StreamHandler())
+    logger = logging.getLogger(__name__)
+    logger.addHandler(logging.StreamHandler())
     requests_logger = logging.getLogger('requests')
     requests_logger.setLevel(logging.WARNING)
+    return logger
 
 
 def run():
     if len(sys.argv) > 1 and sys.argv[1] == 'debug':
-        set_logging(info['log_filename'], logging.DEBUG)
-        print('running with logging on Debug')
+        logger = set_logging(info['log_filename'], logging.DEBUG)
+        logging.info('running with logging on Debug')
     else:
-        set_logging(info['log_filename'])
+        logger = set_logging(info['log_filename'])
 
     reddit = praw.Reddit(info['useragent'])
     reddit.login(credentials['username'], credentials['password'])
