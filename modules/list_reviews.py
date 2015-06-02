@@ -3,7 +3,7 @@ from config import info
 from modules import ReviewBase
 from fuzzywuzzy import fuzz
 from functools import partial
-from helpers import peek
+from helpers.functions import peek
 from collections import namedtuple
 import logging
 

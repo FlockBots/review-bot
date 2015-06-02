@@ -1,6 +1,6 @@
 import re
 import praw
-from helpers import rate_limited
+from helpers.decorators import rate_limited
 from helpers import Editable
 from helpers import Singleton
 from config import info
