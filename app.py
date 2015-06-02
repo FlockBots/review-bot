@@ -37,8 +37,11 @@ def run():
     register_modules()
 
     while True:
-        bot.check_messages(mark_read=True)
-        time.sleep(60)
+        num_messages_read = bot.check_messages(mark_read=True)
+        if num_messages_read < 3:
+            time.sleep(300)
+        else:
+            time.sleep(60)
 
 
 def register_modules():
