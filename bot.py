@@ -60,7 +60,7 @@ class Bot(metaclass=Singleton):
                 has_callback = True
                 for callback in functions:
                     callback(editable, match)
-        self.reply(editable)
+        self.reply_to(editable)
         return has_callback
 
     def register_regex(self, regex):
@@ -96,7 +96,7 @@ class Bot(metaclass=Singleton):
         self.reply_text += '\n___\n'
 
     @rate_limited
-    def reply(self, editable, text=None):
+    def reply_to(self, editable, text=None):
         """ Comments on the object
 
             Args:
@@ -109,6 +109,8 @@ class Bot(metaclass=Singleton):
             id=editable.id, msg=self.reply_text)
         )
         editable.reply(self.reply_text)
+
+        # reset reply text
         self.reply_text = ''
 
     def __repr__(self):
