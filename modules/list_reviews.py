@@ -105,7 +105,7 @@ def _get_reviews(user, subreddit=None, bottle=None):
     '''
     logger.debug('Getting reviews (sub:{}, bottle:{})'.format(subreddit, bottle))
 
-    review_db = ReviewBase()
+    review_db = ReviewBase(info['database_filename'])
     reviews = review_db.select(author=user, subreddit=subreddit)
 
     if not bottle:

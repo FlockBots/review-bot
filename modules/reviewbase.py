@@ -7,7 +7,7 @@ class ReviewBase(metaclass=Singleton):
 
     TABLE = 'reviews'
 
-    def __init__(self, filename='reviews.db'):
+    def __init__(self, filename):
         self.logger = logging.getLogger(__name__)
         self.table = 'reviews'
         self.connection = sqlite3.connect(filename)

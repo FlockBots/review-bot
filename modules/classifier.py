@@ -36,7 +36,7 @@ class DataSet:
 
 class Classifier:
 
-    def __init__(self, database_file='classified_reviews.db'):
+    def __init__(self, database_file='data/classified_reviews.db'):
         training_set, test_set = create_sets(database_file)
 
         self.vectorizer = TfidfVectorizer(
