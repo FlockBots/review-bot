@@ -11,8 +11,8 @@ bot = Bot.get_instance()  # Singleton
 logger = logging.getLogger(__name__)
 
 # Register function below
-# @bot.register_regex(r'my_regex')   -   Fires function if comment/submission matches regex
 # @bot.make_reply                    -   Creates a reply using the returned string
+# @bot.register_regex(r'my_regex')   -   Fires function if comment/submission matches regex
 # def callback(editable, match): pass    The callback receives the editable (comment, submission, message) and the matching phrase
 
 
