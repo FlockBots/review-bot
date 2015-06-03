@@ -45,7 +45,7 @@ def run():
 
 
 def register_modules():
-    ''' Imports all modules that need to be registered by the Bot '''
+    """ Imports all modules that need to be registered by the Bot """
     from modules import list_reviews
 
 if __name__ == '__main__':

@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 @bot.make_reply
 @bot.register_regex(r'/u/review_bot list')
 def list_reviews(editable, match):
-    ''' List reviews from a subreddit containing a certain keyword.
+    """ List reviews from a subreddit containing a certain keyword.
 
         Args:
             editable: The submission, message or comment containing the trigger
             match: re.Match object
         Returns: (string)
             A markdown list of matching reviews.
-    '''
+    """
     logger.debug('Listing reviews by {} (all)'.format(editable.author))
 
     reviews = _get_reviews(user=editable.author)
@@ -41,7 +41,7 @@ def list_reviews(editable, match):
 @bot.make_reply
 @bot.register_regex(r'/u/review_bot ({subs})'.format(subs='|'.join(info['review_subs'])))
 def list_reviews_subreddit(editable, match):
-    ''' List most recent reviews from subreddit
+    """ List most recent reviews from subreddit
 
         Args:
             editable: The submission, message or comment containing the trigger
@@ -49,7 +49,7 @@ def list_reviews_subreddit(editable, match):
                    1 - the name of the subreddit
         Returns: (string)
             A markdown list of matching reviews.
-    '''
+    """
     subreddit = match.group(1).title()
     logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author, subreddit))
 
@@ -66,7 +66,7 @@ def list_reviews_subreddit(editable, match):
 @bot.make_reply
 @bot.register_regex(r'''/u/review_bot [`'"]([a-zA-Z0-9_\ -]+)[`'"]''')
 def list_reviews_bottle(editable, match):
-    ''' List reviews about a certain bottle/brand.
+    """ List reviews about a certain bottle/brand.
 
         Args:
             editable: The submission, message or comment containing the trigger
@@ -74,7 +74,7 @@ def list_reviews_bottle(editable, match):
                    1 - the name of the bottle
         Returns: (string)
             A markdown list of matching reviews.
-    '''
+    """
     bottle = match.group(1)
     logger.debug('Listing reviews by {} (bottle:{})'.format(editable.author, bottle))
 
@@ -93,7 +93,7 @@ ScoredReview = namedtuple('ScoredReview', ['review', 'score'])
 
 
 def _get_reviews(user, subreddit=None, bottle=None):
-    ''' Get all reviews of a user.
+    """ Get all reviews of a user.
 
         Args:
             user: (string) The username
@@ -102,7 +102,7 @@ def _get_reviews(user, subreddit=None, bottle=None):
 
         Returns:
             A list for all reviews matching the criteria.
-    '''
+    """
     logger.debug('Getting reviews (sub:{}, bottle:{})'.format(subreddit, bottle))
 
     review_db = ReviewBase(info['database_filename'])
@@ -122,7 +122,7 @@ def _get_reviews(user, subreddit=None, bottle=None):
 
 
 def _calculate_match_score(review, bottle):
-    ''' Calculate the ratio in which the bottle matches the review.
+    """ Calculate the ratio in which the bottle matches the review.
 
         Args:
             review: modules.reviewbase.Review object to match against
@@ -130,7 +130,7 @@ def _calculate_match_score(review, bottle):
 
         Returns:
             Score [0, 100], the higher the score the better the match
-    '''
+    """
 
     bottle_score = 0
     if review['bottle']:
@@ -141,7 +141,7 @@ def _calculate_match_score(review, bottle):
 
 
 def _create_review_list(reviews, max_reviews=10):
-    ''' Create a string containing links to the reviews. '''
+    """ Create a string containing links to the reviews. """
     review_list = ''
     for index, review in reviews:
         if index >= max_reviews:

@@ -4,9 +4,9 @@ import time
 
 
 def rate_limited(function):
-    ''' Tries to execute a Reddit API related function. 
+    """ Tries to execute a Reddit API related function. 
         If the Reddit rate limit is exceeded, it sleeps for a sufficient amount of time before retrying.
-    '''
+    """
     def wrapper(*args, **kwargs):
         while True:
             try:
@@ -20,10 +20,10 @@ def rate_limited(function):
 
 
 def cursor_op(function):
-    ''' Opens the cursor, passes it to the function and closes it.
+    """ Opens the cursor, passes it to the function and closes it.
         Requires a instance variable named 'connection' of type sqlite3.Connection.
         Decorated function should accept an argument called cursor.
-    '''
+    """
     def wrapper(*args, **kwargs):
         self, *args = args
         cursor = self.connection.cursor()

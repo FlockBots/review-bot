@@ -33,12 +33,12 @@ class ReviewBase(metaclass=Singleton):
 
     @cursor_op
     def insert(self, review, cursor):
-        ''' Insert a new Review into the database
+        """ Insert a new Review into the database
 
             Args:
                 review: a dictionary containing the right columns (see table definition)
                 cursor: sqlite3.Cursor passed by decorator
-        '''
+        """
         self.logger.debug('Inserting review ({title} by {author})'.format(**review))
         try:
             cursor.execute(
@@ -59,7 +59,7 @@ class ReviewBase(metaclass=Singleton):
 
     @cursor_op
     def select(self, author, cursor, subreddit=None):
-        ''' Select Reviews from the database matching criteria
+        """ Select Reviews from the database matching criteria
 
             Args:
                 user     : (string) The author of the review
@@ -67,7 +67,7 @@ class ReviewBase(metaclass=Singleton):
                 cursor   : sqlite3.Cursor passed by decorator
             Returns:
                 A generator of reviews (dict) matching the criteria.
-        '''
+        """
         self.logger.debug('Selecting review by {} (subreddit: {})'.format(author, subreddit))
         if not subreddit:
             cursor.execute(

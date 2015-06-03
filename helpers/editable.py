@@ -2,9 +2,7 @@ import praw
 
 
 class Editable:
-    """ 
-    Helper class to contain similar attributes for PRAW comments and submission
-    """
+    """ Helper class to contain similar attributes for PRAW comments and submission """
 
     Submission = 'submission'
     Comment    = 'comment'
