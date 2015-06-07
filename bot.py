@@ -68,7 +68,6 @@ class Bot(metaclass=Singleton):
             self.check_callbacks(editable, self.general_callbacks)
             self.database.store_editable(editable)
 
-
     def check_callbacks(self, editable, callbacks):
         """ Iterates over registered callbacks
 
