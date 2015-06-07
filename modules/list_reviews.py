@@ -1,4 +1,4 @@
-from bot import Bot
+from bot import Callback
 from config import info
 from config import credentials
 from modules import ReviewBase
@@ -6,19 +6,46 @@ from fuzzywuzzy import fuzz
 from helpers.functions import peek
 from collections import namedtuple
 import logging
+import functools
 
-bot = Bot.get_instance()  # Singleton
+
 logger = logging.getLogger(__name__)
 
-# Register function below
-# @bot.make_reply                    -   Creates a reply using the returned string
-# @bot.register_regex(r'my_regex')   -   Fires function if comment/submission matches regex
-# def callback(editable, match): pass    The callback receives the editable (comment, submission, message) and the matching phrase
+def register(review_db):
+    """ Returns a list of tuples containing regular expressions and
+        their callback functions
+
+        Args:
+            review_db: instance of ReviewBase. Required to insert new reviews.
+        Returns:
+            A list of Callback tuples (regex and function pairs)
+    """
+    return [
+        Callback(
+         regex=r'{username} list'.format(
+            username=credentials['username']),
+         function=functools.partial(list_reviews,
+            review_db=review_db)
+         ),
+
+        Callback(
+         regex=r'{username} ({subs})'.format(
+            username=credentials['username'],
+            subs='|'.join(info['review_subs'])),
+         function=functools.partial(list_reviews_subreddit,
+            review_db=review_db)
+         ),
+
+        Callback(
+         regex='''{username} [`'"]([a-zA-Z0-9_\ -]+)[`'"]'''.format(
+            username=credentials['username']),
+         function=functools.partial(list_reviews_bottle,
+            review_db=review_db)
+         ),
+    ]
 
 
-@bot.make_reply
-@bot.register_regex(r'{username} list'.format(username=credentials['username']))
-def list_reviews(editable, match):
+def list_reviews(editable, match, review_db):
     """ List reviews from a subreddit containing a certain keyword.
 
         Args:
@@ -29,19 +56,17 @@ def list_reviews(editable, match):
     """
     logger.debug('Listing reviews by {} (all)'.format(editable.author))
 
-    reviews = _get_reviews(user=editable.author)
+    reviews = _get_reviews(user=editable.author, review_db=review_db)
 
     if peek(reviews):
         reply = "{user}'s latest reviews:\n\n".format(user=editable.author)
         reply += _create_review_list(reviews)
     else:
-        reply  = "I can't find a single review under your name. :(\n\n"
+        reply = "I can't find a single review under your name. :(\n\n"
     return reply
 
 
-@bot.make_reply
-@bot.register_regex(r'{username} ({subs})'.format(username=credentials['username'], subs='|'.join(info['review_subs'])))
-def list_reviews_subreddit(editable, match):
+def list_reviews_subreddit(editable, match, review_db):
     """ List most recent reviews from subreddit
 
         Args:
@@ -54,7 +79,7 @@ def list_reviews_subreddit(editable, match):
     subreddit = match.group(1).title()
     logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author, subreddit))
 
-    reviews = _get_reviews(user=editable.author, subreddit=subreddit)
+    reviews = _get_reviews(user=editable.author, review_db=review_db, subreddit=subreddit)
 
     if peek(reviews):
         reply = "{user}'s latest reviews in /r/{sub}:\n\n".format(user=editable.author, sub=subreddit)
@@ -64,9 +89,7 @@ def list_reviews_subreddit(editable, match):
     return reply
 
 
-@bot.make_reply
-@bot.register_regex(r'''{username} [`'"]([a-zA-Z0-9_\ -]+)[`'"]'''.format(username=credentials['username']))
-def list_reviews_bottle(editable, match):
+def list_reviews_bottle(editable, match, review_db):
     """ List reviews about a certain bottle/brand.
 
         Args:
@@ -79,7 +102,7 @@ def list_reviews_bottle(editable, match):
     bottle = match.group(1)
     logger.debug('Listing reviews by {} (bottle:{})'.format(editable.author, bottle))
 
-    reviews = _get_reviews(user=editable.author, bottle=bottle)
+    reviews = _get_reviews(user=editable.author, review_db=review_db, bottle=bottle)
 
     if peek(reviews):
         reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author, bottle=bottle)  
@@ -93,7 +116,7 @@ def list_reviews_bottle(editable, match):
 ScoredReview = namedtuple('ScoredReview', ['review', 'score'])
 
 
-def _get_reviews(user, subreddit=None, bottle=None):
+def _get_reviews(user, review_db, subreddit=None, bottle=None):
     """ Get all reviews of a user.
 
         Args:
@@ -106,8 +129,7 @@ def _get_reviews(user, subreddit=None, bottle=None):
     """
     logger.debug('Getting reviews (sub:{}, bottle:{})'.format(subreddit, bottle))
 
-    review_db = ReviewBase(info['database_filename'])
-    reviews = review_db.select(author=user, subreddit=subreddit)
+    reviews = review_db.select(author=user, review_db=review_db, subreddit=subreddit)
 
     if not bottle:
         return reviews
@@ -116,7 +138,7 @@ def _get_reviews(user, subreddit=None, bottle=None):
 
     for review in reviews:
         match_score = _calculate_match_score(review=review, bottle=bottle)
-        if match_score > 66: # 2/3th of the string matches
+        if match_score > 66:  # 2/3th of the string matches
             best_matches.append(ScoredReview(review, match_score))
     best_matches.sort(key=lambda sr: (sr.score, sr.review['date']), reverse=True)
     return (scored.review for scored in best_matches)
@@ -147,6 +169,8 @@ def _create_review_list(reviews, max_reviews=10):
     for index, review in reviews:
         if index >= max_reviews:
             break
-        review_list += '* [{title}]({url})\n'.format(review['title'], review['permalink'])
+        review_list += '* [{title}]({url})\n'.format(
+            title=review['title'], url=review['permalink']
+        )
     review_list += '\n'
     return review_list
