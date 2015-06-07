@@ -1,4 +1,5 @@
 import praw
+from datetime import datetime
 
 
 class Editable:
@@ -13,6 +14,7 @@ class Editable:
         self.id        = editable.id
         self.author    = editable.author
         self.permalink = editable.permalink
+        self.date      = datetime.fromtimestamp(editable.created_utc)
         if isinstance(editable, praw.objects.Comment):
             self._set_comment_properties(editable)
         elif isinstance(editable, praw.objects.Submission):
