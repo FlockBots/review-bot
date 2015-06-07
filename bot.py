@@ -3,12 +3,24 @@ from helpers.decorators import rate_limited
 from helpers import Editable
 from helpers import Singleton
 from config import info
+from collections import namedtuple
 import logging
+
+
+Callback = namedtuple('Callback', ['regex', 'function'])
 
 
 class Bot(metaclass=Singleton):
     def __init__(self, reddit, database, footer=''):
-        self.regex_callbacks = {}
+        # Stores callbacks for specific bot calls.
+        self.trigger_callbacks = {}
+
+        # Stores callbacks for when patterns are recognised in a comment.
+        self.general_callbacks = {}
+
+        # Stores the last visited comments of a subreddit.
+        self.last_visited = {}
+
         self.reddit = reddit
         self.database = database
         self.footer = footer or "___\n^(Hey I'm a bot! Please address any remarks to {}.)".format(info['owner'])
@@ -33,13 +45,31 @@ class Bot(metaclass=Singleton):
             editable = Editable(message)
 
             # if a callback was made, mark as read.
-            if self.check_callbacks(editable) or mark_read:
+            if self.check_callbacks(editable, self.trigger_callbacks) or mark_read:
                 message.mark_as_read()
                 total_read += 1
             self.database.store_editable(editable)
         return total_read
 
-    def check_callbacks(self, editable):
+    def check_comments(self, subreddit):
+        if len(self.general_callbacks) == 0:
+            return
+        last_comment = self.last_visited.get(subreddit, None)
+        comments = self.get_comments(
+            subreddit=subreddit,
+            place_holder=last_comment,
+            limit=None
+        )
+        for comment in comments:
+            if self.database.get_editable(comment):
+                continue
+            editable = Editable(comment)
+            self.check_callbacks(editable, self.trigger_callbacks)
+            self.check_callbacks(editable, self.general_callbacks)
+            self.database.store_editable(editable)
+
+
+    def check_callbacks(self, editable, callbacks):
         """ Iterates over registered callbacks
 
             If the editable contains text that triggers a registered callback,
@@ -48,6 +78,7 @@ class Bot(metaclass=Singleton):
 
             Args:
                 editable: (helper.Editable) the editable to check for triggers
+                callbacks: dictionary of callbacks. Key: regex, value: function
             Returns:
                 True, when a callback was triggered
                 False, otherwise
@@ -59,28 +90,23 @@ class Bot(metaclass=Singleton):
             if match:
                 has_callback = True
                 for callback in functions:
-                    callback(editable, match)
+                    reply = callback(editable, match)
+                    if isinstance(reply, str):
+                        self.build_reply(reply)
         self.reply_to(editable)
         return has_callback
 
-    def register_regex(self, regex):
-        """ Decorator to register callbacks """
-        def wrapper(function):
-            self.logger.debug('Registering "{fn}" at: "{regex}"'.format(fn=function.__name__, regex=regex))
-            self.regex_callbacks.get(regex, []).append(function)
-            return function
-        return wrapper
+    def register_trigger(self, callback):
+        self.logger.debug('Registering "{fn}" at: "{regex}"'.format(
+            fn=callback.function.__name__, regex=callback.regex)
+        )
+        self.trigger_callbacks.get(callback.regex, []).append(callback.function)
 
-    def make_reply(self, function):
-        """ Decorator to let the bot reply
-            Requires the function to return a string
-        """
-        def wrapper(*args, **kwargs):
-            text = function(*args, **kwargs)
-            if not isinstance(text, str):
-                raise TypeError('Callback does not return a string.')
-            self.build_reply(text)
-        return wrapper
+    def register_general(self, callback):
+        self.logger.debug('Registering "{fn}" at: "{regex}"'.format(
+            fn=callback.function.__name__, regex=callback.regex)
+        )
+        self.general_callbacks.get(callback.regex, []).append(callback.function)
 
     def build_reply(self, text):
         if not text:
