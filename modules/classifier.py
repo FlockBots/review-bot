@@ -6,6 +6,7 @@ import os
 import random
 from collections import namedtuple
 from pprint import pprint
+from helpers import Singleton
 
 # data table structure:
 ''' CREATE TABLE `data` (
@@ -34,7 +35,7 @@ class DataSet:
         return chain(self.positive, self.negative).__iter__()
 
 
-class Classifier:
+class Classifier(metaclass=Singleton):
 
     def __init__(self, database_file='data/classified_reviews.db'):
         training_set, test_set = create_sets(database_file)
