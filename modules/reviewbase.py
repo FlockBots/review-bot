@@ -46,7 +46,7 @@ class ReviewBase(metaclass=Singleton):
                 .format(ReviewBase.TABLE),
                 (
                     review['author'], review['bottle'], review['date'], review['permalink'],
-                    review['score'], review['permalink'], review['title']
+                    review['score'], review['subreddit'], review['title']
                 )
             )
         except sqlite3.IntegrityError:
