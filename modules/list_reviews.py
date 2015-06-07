@@ -1,5 +1,6 @@
 from bot import Bot
 from config import info
+from config import credentials
 from modules import ReviewBase
 from fuzzywuzzy import fuzz
 from helpers.functions import peek
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @bot.make_reply
-@bot.register_regex(r'/u/review_bot list')
+@bot.register_regex(r'{username} list'.format(username=credentials['username']))
 def list_reviews(editable, match):
     """ List reviews from a subreddit containing a certain keyword.
 
@@ -39,7 +40,7 @@ def list_reviews(editable, match):
 
 
 @bot.make_reply
-@bot.register_regex(r'/u/review_bot ({subs})'.format(subs='|'.join(info['review_subs'])))
+@bot.register_regex(r'{username} ({subs})'.format(username=credentials['username'], subs='|'.join(info['review_subs'])))
 def list_reviews_subreddit(editable, match):
     """ List most recent reviews from subreddit
 
@@ -64,7 +65,7 @@ def list_reviews_subreddit(editable, match):
 
 
 @bot.make_reply
-@bot.register_regex(r'''/u/review_bot [`'"]([a-zA-Z0-9_\ -]+)[`'"]''')
+@bot.register_regex(r'''{username} [`'"]([a-zA-Z0-9_\ -]+)[`'"]'''.format(username=credentials['username']))
 def list_reviews_bottle(editable, match):
     """ List reviews about a certain bottle/brand.
 
