@@ -1,5 +1,6 @@
 *.db
 *.log
+data/archive.csv
 config/
 bin/
 include/
