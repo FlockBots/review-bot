@@ -2,7 +2,7 @@ import praw
 from helpers import Database
 from config import info
 from config import credentials
-from bot import Bot
+from helpers import Bot
 from modules import ReviewBase
 import time
 import sys

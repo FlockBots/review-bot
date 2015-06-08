@@ -1,3 +1,4 @@
+from helpers.bot import Bot
 from helpers import decorators
 from helpers.editable import Editable
 from helpers.database import Database
