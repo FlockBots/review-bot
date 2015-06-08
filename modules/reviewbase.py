@@ -58,7 +58,7 @@ class ReviewBase(metaclass=Singleton):
 
     @cursor_op
     def update_or_insert(self, review, cursor):
-        self.logger.debug('Updating review ({title by {author})'.format(**review))
+        self.logger.debug('Updating review ({title} by {author})'.format(**review))
         if self.select(author=review['author']):
             try:
                 cursor.execute(
