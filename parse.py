@@ -17,5 +17,4 @@ def parse():
             'subreddit': submission.subreddit.display_name.lower(),
             'title': submission.title
         }
-        review_db.insert_or_update(review)
-
+        review_db.update_or_insert(review)
