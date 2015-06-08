@@ -1,4 +1,4 @@
-from bot import Callback
+from helpers.bot import Callback
 from config import info
 from config import credentials
 from modules import ReviewBase

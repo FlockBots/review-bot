@@ -1,7 +1,7 @@
 from helpers import Editable
 from modules import classifier
 from modules import ReviewBase
-from bot import Callback
+from helpers.bot import Callback
 import functools
 
 
