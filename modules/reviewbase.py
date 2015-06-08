@@ -56,6 +56,24 @@ class ReviewBase(metaclass=Singleton):
         else:
             self.connection.commit()
 
+    def update_or_insert(self, review, cursor):
+        self.logger.debug('Updating review ({title by {author})'.format(**review))
+        if self.select(author=review['author']):
+            try:
+                cursor.execute(
+                    '''UPDATE {} SET bottle=?, score=?
+                       WHERE author=? AND (title=? OR permalink=?)'''
+                      .format(ReviewBase.TABLE),
+                    (review['bottle'], review['score'], review['author'],
+                        review['title'], review['permalink'])
+                )
+            except:
+                self.logger.exception('Unabe to update review.')
+            else:
+                self.connection.commit()
+        else:
+            self.insert(review)
+
 
     @cursor_op
     def select(self, author, cursor, subreddit=None):
