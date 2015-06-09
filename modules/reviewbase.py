@@ -51,7 +51,7 @@ class ReviewBase(metaclass=Singleton):
             )
         except sqlite3.IntegrityError:
             self.logger.info('Review ({}) already exists in database.'.format(review.permalink))
-        except:
+        except sqlite3.Error:
             self.logger.exception('Unable to add review to database.')
         else:
             self.connection.commit()
@@ -59,21 +59,24 @@ class ReviewBase(metaclass=Singleton):
     @cursor_op
     def update_or_insert(self, review, cursor):
         self.logger.debug('Updating review ({title} by {author})'.format(**review))
-        if self.select(author=review['author']):
-            try:
-                cursor.execute(
-                    '''UPDATE {} SET bottle=?, score=?
-                       WHERE author=? AND (title=? OR permalink=?)'''
-                      .format(ReviewBase.TABLE),
-                    (review['bottle'], review['score'], review['author'],
-                        review['title'], review['permalink'])
-                )
-            except:
-                self.logger.exception('Unabe to update review.')
-            else:
-                self.connection.commit()
+        try:
+            cursor.execute(
+                '''UPDATE {} SET bottle=?, score=?
+                   WHERE author=? AND (title=? OR permalink=?)'''
+                  .format(ReviewBase.TABLE),
+                (review['bottle'], review['score'], review['author'],
+                    review['title'], review['permalink'])
+            )
+        except sqlite3.Error:
+            self.logger.exception('Unable to update review.')
         else:
-            self.insert(review)
+            if cursor.rowcount == 0:
+                self.insert(review)
+            elif cursor.rowcount > 1:
+                self.logger.warning('More than one row has been updated for'
+                                    ' {title} by {author}'.format(**review)
+                                    )
+            self.connection.commit()
 
 
     @cursor_op
