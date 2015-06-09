@@ -24,7 +24,6 @@ def parse(skip=0):
             'subreddit': submission.subreddit.display_name.lower(),
             'title': submission.title
         }
-        logger.debug('Review: {author}, {bottle}'.format(**review))
         review_db.update_or_insert(review)
 
 def _file_age(filename):
