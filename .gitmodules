@@ -1,4 +1,4 @@
 [submodule "archive_parser"]
 	path = archive_parser
-	url = https://github.com/FlockBots/ArchiveParser.git
+    url = git@github.com:FlockBots/ArchiveParser.git
     ignore = dirty
