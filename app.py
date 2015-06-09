@@ -13,7 +13,7 @@ from modules import classify_incoming
 def set_logging(log_filename, level=logging.INFO):
     logging.basicConfig(
         filename=log_filename,
-        level=logging.INFO,
+        level=level,
         format='{asctime} | {name:<8.8} | {levelname:<8.8} | {message}',
         style='{'
     )
