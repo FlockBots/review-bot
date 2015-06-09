@@ -106,3 +106,9 @@ class ReviewBase(metaclass=Singleton):
                 (author,subreddit.lower())
             )
         return cursor.fetchall()
+
+    @cursor_op
+    def execute(self, query, params, cursor):
+        """ Execute a query on the database. """
+        cursor.execute(query, params)
+        return cursor.fetchall()
