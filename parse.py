@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 import app
 import argparse
+import functools
 
 def parse(skip=0):
     parser = Parser(info['archive_file'])
@@ -14,7 +15,8 @@ def parse(skip=0):
         parser.download(info['archive_key'])
     review_db = ReviewBase(info['database_filename'])
 
-    for row, submission in parser.get_submissions(skip):
+    review_filter = functools.partial(_new_review_filter, review_db=review_db)
+    for row, submission in parser.get_submissions(skip=skip, row_filter=review_filter):
         review = {
             'author': row['user'].lower(),
             'bottle': row['whisky'],
@@ -25,6 +27,22 @@ def parse(skip=0):
             'title': submission.title
         }
         review_db.update_or_insert(review)
+
+def _new_review_filter(row, review_db):
+    if not row['date']:
+        return False
+    formatted_date = row['date'].strftime('%Y%m%d')
+    stored_reviews = review_db.execute(
+        'SELECT * FROM {} WHERE author = ? AND (permalink = ? OR date = ?)'
+        .format(ReviewBase.TABLE), (row['user'].lower(), row['url'], formatted_date)
+    )
+    if not stored_reviews:
+        return False
+    for stored in stored_reviews:
+        if not stored['bottle']:
+            return False
+    return True
+
 
 def _file_age(filename):
     """ Get the age of a file
