@@ -14,7 +14,7 @@ def set_logging(log_filename, level=logging.INFO):
     logging.basicConfig(
         filename=log_filename,
         level=level,
-        format='{asctime} | {name:<8.8} | {levelname:<8.8} | {message}',
+        format='{asctime:<19.19} | {name:<20.20} | {levelname:<6.6} | {message}',
         style='{'
     )
     logger = logging.getLogger(__name__)
