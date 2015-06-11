@@ -8,15 +8,25 @@ from datetime import datetime
 import app
 import argparse
 import functools
+import re
 
-def parse(skip=0):
+def parse(skip=0, filter_date=None):
     parser = Parser(info['archive_file'])
     if _file_age(info['archive_file']).days > 1:
         parser.download(info['archive_key'])
     review_db = ReviewBase(info['database_filename'])
 
-    review_filter = functools.partial(_new_review_filter, review_db=review_db)
-    for row, submission in parser.get_submissions(skip=skip, row_filter=review_filter):
+    if not filter_date:
+        filter_date = '01/01/1970'
+    filter_date = parser.parse_date(filter_date)
+    logger.info('Skipping reviews entered before {}.'.format(str(filter_date)))
+    review_filter = functools.partial(
+        _new_review_filter,
+        review_db=review_db,
+        filter_date=filter_date
+    )
+    archive = parser.get_submissions(skip=skip, row_filter=review_filter)
+    for row, submission in archive:
         review = {
             'author': row['user'].lower(),
             'bottle': row['whisky'],
@@ -28,7 +38,15 @@ def parse(skip=0):
         }
         review_db.update_or_insert(review)
 
-def _new_review_filter(row, review_db):
+
+def _new_review_filter(row, review_db, filter_date):
+    try:
+        delta = filter_date - row['archived']
+    except TypeError:
+        logging.error('No archival date.')
+    else:
+        if delta.days > 0:
+            return True
     if not row['date']:
         return False
     formatted_date = row['date'].strftime('%Y%m%d')
@@ -58,11 +76,16 @@ def _file_age(filename):
     return datetime.now() - file_datetime
 
 def set_commandline_args():
-    parser = argparse.ArgumentParser(description='Parse the Reddit Whisky Review Archive.')
-    parser.add_argument('--log', '-l', default='info',
+    parser = argparse.ArgumentParser(
+        description='Parse the Reddit Whisky Review Archive.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument('--log', default='info', metavar='LEVEL',
                        help='Set the log level to debug or info.')
-    parser.add_argument('--skip', '-s', type=int, default=0,
+    parser.add_argument('--skip', type=int, default=0, metavar='N',
                        help='Skip the first n rows of the archive.')
+    parser.add_argument('--filter-date', metavar='DATE', default='01/01/1970',
+                        help="Skip reviews older than the given date (mm/dd/YYYY).")
 
     args = parser.parse_args()
     return args
@@ -75,4 +98,4 @@ if __name__ == '__main__':
     app.set_logging(info['log_filename'], level)
     logger = logging.getLogger(__name__)
     logger.debug('Logging in debug mode.')
-    parse(args.skip)
+    parse(args.skip, args.filter_date)
