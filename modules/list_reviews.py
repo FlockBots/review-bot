@@ -128,8 +128,10 @@ def _get_reviews(user, review_db, subreddit=None, bottle=None):
             A list for all reviews matching the criteria.
     """
     logger.debug('Getting reviews (sub:{}, bottle:{})'.format(subreddit, bottle))
-
-    reviews = review_db.select(author=user, review_db=review_db, subreddit=subreddit)
+    user = user.lower()
+    if subreddit:
+        subreddit = subreddit.lower()
+    reviews = review_db.select(author=user, subreddit=subreddit)
 
     if not bottle:
         return reviews
@@ -166,7 +168,7 @@ def _calculate_match_score(review, bottle):
 def _create_review_list(reviews, max_reviews=10):
     """ Create a string containing links to the reviews. """
     review_list = ''
-    for index, review in reviews:
+    for index, review in enumerate(reviews):
         if index >= max_reviews:
             break
         review_list += '* [{title}]({url})\n'.format(
