@@ -54,12 +54,12 @@ def list_reviews(editable, match, review_db):
         Returns: (string)
             A markdown list of matching reviews.
     """
-    logger.debug('Listing reviews by {} (all)'.format(editable.author))
+    logger.debug('Listing reviews by {} (all)'.format(editable.author.name))
 
-    reviews = _get_reviews(user=editable.author, review_db=review_db)
+    reviews = _get_reviews(user=editable.author.name, review_db=review_db)
 
     if peek(reviews):
-        reply = "{user}'s latest reviews:\n\n".format(user=editable.author)
+        reply = "{user}'s latest reviews:\n\n".format(user=editable.author.name)
         reply += _create_review_list(reviews)
     else:
         reply = "I can't find a single review under your name. :(\n\n"
@@ -77,12 +77,12 @@ def list_reviews_subreddit(editable, match, review_db):
             A markdown list of matching reviews.
     """
     subreddit = match.group(1).title()
-    logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author, subreddit))
+    logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author.name, subreddit))
 
-    reviews = _get_reviews(user=editable.author, review_db=review_db, subreddit=subreddit)
+    reviews = _get_reviews(user=editable.author.name, review_db=review_db, subreddit=subreddit)
 
     if peek(reviews):
-        reply = "{user}'s latest reviews in /r/{sub}:\n\n".format(user=editable.author, sub=subreddit)
+        reply = "{user}'s latest reviews in /r/{sub}:\n\n".format(user=editable.author.name, sub=subreddit)
         reply += _create_review_list(reviews)
     else:
         reply = "You don't seem to have any reviews in /r/{sub} yet, buddy.\n\n".format(sub=subreddit)
@@ -100,12 +100,12 @@ def list_reviews_bottle(editable, match, review_db):
             A markdown list of matching reviews.
     """
     bottle = match.group(1)
-    logger.debug('Listing reviews by {} (bottle:{})'.format(editable.author, bottle))
+    logger.debug('Listing reviews by {} (bottle:{})'.format(editable.author.name, bottle))
 
-    reviews = _get_reviews(user=editable.author, review_db=review_db, bottle=bottle)
+    reviews = _get_reviews(user=editable.author.name, review_db=review_db, bottle=bottle)
 
     if peek(reviews):
-        reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author, bottle=bottle)  
+        reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author.name, bottle=bottle)
         reply += _create_review_list(reviews)
     else:
         reply = "Sorry, I can't seem to find any `{bottle}` reviews by you, mate. :(\n\n".format(bottle=bottle)
