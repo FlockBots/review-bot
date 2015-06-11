@@ -58,7 +58,6 @@ class ReviewBase(metaclass=Singleton):
 
     @cursor_op
     def update_or_insert(self, review, cursor):
-        self.logger.debug('Updating review ({title} by {author})'.format(**review))
         try:
             cursor.execute(
                 '''UPDATE {} SET bottle=?, score=?
@@ -70,13 +69,15 @@ class ReviewBase(metaclass=Singleton):
         except sqlite3.Error:
             self.logger.exception('Unable to update review.')
         else:
+            if cursor.rowcount >= 1:
+                self.logger.debug('Updating review ({title} by {author})'.format(**review))
+                self.connection.commit()
             if cursor.rowcount == 0:
                 self.insert(review)
             elif cursor.rowcount > 1:
                 self.logger.warning('More than one row has been updated for'
                                     ' {title} by {author}'.format(**review)
                                     )
-            self.connection.commit()
 
 
     @cursor_op
