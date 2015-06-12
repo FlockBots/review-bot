@@ -56,11 +56,11 @@ def run():
             num_messages_read = bot.check_messages(mark_read=True)
             for sub in info['review_subs']:
                 bot.check_comments(sub)
-        except ConnectionError, HTTPError, Timeout:
+        except (ConnectionError, HTTPError, Timeout):
             connection_error_count += 1
             if connection_error_count > 5:
                 raise EnvironmentError('No connection available for {} seconds.'
-                    .format(5 * connection_timeout))
+                                       .format(5 * connection_timeout))
             else:
                 time.sleep(connection_timeout)
         except KeyboardInterrupt:
