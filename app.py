@@ -41,6 +41,10 @@ def run():
     level = logging.DEBUG if args['debug'] else logging.INFO
     logger = set_logging(info['log_filename'], level)
 
+    logger.info('Starting bot:')
+    logger.info('\tuser-agent: {}'.format(info['useragent']))
+    logger.info('\tusername: {}'.format(credentials['username']))
+    logger.info('\tdatabase: {}'.format(info['database_filename']))
     reddit = praw.Reddit(info['useragent'])
     reddit.login(credentials['username'], credentials['password'])
     database = Database(info['database_filename'])
