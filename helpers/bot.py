@@ -55,17 +55,18 @@ class Bot(metaclass=Singleton):
         if len(self.general_callbacks) == 0:
             return
         last_comment = self.last_visited.get(subreddit, None)
-        comments = self.get_comments(
+        comments = self.reddit.get_comments(
             subreddit=subreddit,
             place_holder=last_comment,
-            limit=None
+            limit=10
         )
         for comment in comments:
+            editable = Editable(comment)
+            self.check_callbacks(editable, self.general_callbacks)
             if self.database.get_editable(comment):
                 continue
-            editable = Editable(comment)
+
             self.check_callbacks(editable, self.trigger_callbacks)
-            self.check_callbacks(editable, self.general_callbacks)
             self.database.store_editable(editable)
 
     def check_callbacks(self, editable, callbacks):
@@ -85,10 +86,10 @@ class Bot(metaclass=Singleton):
         has_callback = False
         for regex, functions in callbacks.items():
             string = editable.text
-            match = re.match(regex, string)
-            logging.debug('Matching `{regex}` on `{string}`'
-                          .format(regex=regex, string=string))
+            match = re.findall(regex, string, re.IGNORECASE)
             if match:
+                logging.debug('Matching `{regex}` on `{string}`'
+                              .format(regex=regex, string=string))
                 has_callback = True
                 for callback in functions:
                     reply = callback(editable, match)
@@ -99,10 +100,12 @@ class Bot(metaclass=Singleton):
         return has_callback
 
     def register_trigger(self, callback):
-        self.trigger_callbacks.get(callback.regex, []).append(callback.function)
+        (self.trigger_callbacks.setdefault(callback.regex, [])
+            .append(callback.function))
 
     def register_general(self, callback):
-        self.general_callbacks.get(callback.regex, []).append(callback.function)
+        (self.general_callbacks.setdefault(callback.regex, [])
+            .append(callback.function))
 
     def build_reply(self, text):
         if not text:
@@ -123,6 +126,8 @@ class Bot(metaclass=Singleton):
                 text: (string) markdown message to put in the comment
         """
         self.build_reply(text)
+        if not self.reply_text:
+            return
         self.reply_text += self.footer
         self.logger.debug('Reply {id}: {msg}'.format(
             id=editable.id, msg=self.reply_text)

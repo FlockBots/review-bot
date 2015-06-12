@@ -33,7 +33,6 @@ class Database(metaclass=Singleton):
         Args:
             editable: PRAW comment, submission or message
         """
-        self.logger.debug('Storing editable ({})'.format(editable.id))
         query = 'INSERT INTO {} VALUES (?)'.format(Database.comment_table)
         cursor.execute(query, (editable.id,))
         self.connection.commit()
@@ -50,7 +49,6 @@ class Database(metaclass=Singleton):
             Otherwise:
                 None
         """
-        self.logger.debug('Selecting editable ({})'.format(editable.id))
         query = 'SELECT * FROM {} WHERE id = ?'.format(Database.comment_table)
         cursor.execute(query, (editable.id,))
         row = cursor.fetchone()

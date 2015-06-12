@@ -23,7 +23,7 @@ def register(review_db):
     """
     return [
         Callback(
-         regex=r'{username} list'.format(
+         regex=r'({username} list)'.format(
             username=credentials['username']),
          function=functools.partial(list_reviews,
             review_db=review_db)
@@ -51,7 +51,7 @@ def list_reviews(editable, match, review_db):
 
         Args:
             editable: The submission, message or comment containing the trigger
-            match: re.Match object
+            match: list of matches (irrelevant to this function)
         Returns: (string)
             A markdown list of matching reviews.
     """
@@ -59,7 +59,8 @@ def list_reviews(editable, match, review_db):
 
     reviews = _get_reviews(user=editable.author.name, review_db=review_db)
 
-    if peek(reviews):
+    peek_review, reviews = peek(reviews)
+    if peek_review:
         reply = "{user}'s latest reviews:\n\n".format(user=editable.author.name)
         reply += _create_review_list(reviews)
     else:
@@ -72,21 +73,25 @@ def list_reviews_subreddit(editable, match, review_db):
 
         Args:
             editable: The submission, message or comment containing the trigger
-            match: re.Match object containing the following groups:
-                   1 - the name of the subreddit
+            match: list of subreddits
         Returns: (string)
             A markdown list of matching reviews.
     """
-    subreddit = match.group(1).title()
-    logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author.name, subreddit))
 
-    reviews = _get_reviews(user=editable.author.name, review_db=review_db, subreddit=subreddit)
+    logger.debug('Listing reviews by {} (subreddit:{})'.format(editable.author.name, match))
 
-    if peek(reviews):
-        reply = "{user}'s latest reviews in /r/{sub}:\n\n".format(user=editable.author.name, sub=subreddit)
-        reply += _create_review_list(reviews)
-    else:
-        reply = "You don't seem to have any reviews in /r/{sub} yet, buddy.\n\n".format(sub=subreddit)
+    reply = ''
+    for subreddit in match:
+        reviews = _get_reviews(
+            user=editable.author.name, review_db=review_db, subreddit=subreddit)
+
+        peek_review, reviews = peek(reviews)
+        if peek_review:
+            reply += "{user}'s latest reviews in /r/{sub}:\n\n".format(
+                user=editable.author.name, sub=subreddit)
+            reply += _create_review_list(reviews)
+        else:
+            reply += "You don't seem to have any reviews in /r/{sub} yet, buddy.\n\n".format(sub=subreddit)
     return reply
 
 
@@ -95,22 +100,24 @@ def list_reviews_bottle(editable, match, review_db):
 
         Args:
             editable: The submission, message or comment containing the trigger
-            match: re.Match object containing the following groups:
-                   1 - the name of the bottle
+            match: List of all bottles
         Returns: (string)
             A markdown list of matching reviews.
     """
-    bottle = match.group(1)
-    logger.debug('Listing reviews by {} (bottle:{})'.format(editable.author.name, bottle))
+    logger.debug('Listing reviews by {} (bottle:{})'.format(
+        editable.author.name, match))
 
-    reviews = _get_reviews(user=editable.author.name, review_db=review_db, bottle=bottle)
-
-    if peek(reviews):
-        reply = "{user}'s latest `{bottle}` reviews:\n\n".format(user=editable.author.name, bottle=bottle)
-        reply += _create_review_list(reviews)
-    else:
-        reply = "Sorry, I can't seem to find any `{bottle}` reviews by you, mate. :(\n\n".format(bottle=bottle)
-
+    reply = ''
+    for bottle in match:
+        reviews = _get_reviews(
+            user=editable.author.name, review_db=review_db, bottle=bottle)
+        peek_review, reviews = peek(reviews)
+        if peek_review:
+            reply += "{user}'s latest `{bottle}` reviews:\n\n".format(
+                user=editable.author.name, bottle=bottle)
+            reply += _create_review_list(reviews)
+        else:
+            reply += "Sorry, I can't seem to find any `{bottle}` reviews by you, mate. :(\n\n".format(bottle=bottle)
     return reply
 
 

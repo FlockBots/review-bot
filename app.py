@@ -59,9 +59,10 @@ def run():
     connection_timeout = 10 * 60
     while True:
         try:
-            num_messages_read = bot.check_messages(mark_read=True)
-            for sub in info['review_subs']:
-                bot.check_comments(sub)
+            # num_messages_read = bot.check_messages(mark_read=True)
+            bot.check_comments('flockbots')
+            # for sub in info['review_subs']:
+            #    bot.check_comments(sub)
         except (ConnectionError, HTTPError, Timeout):
             connection_error_count += 1
             if connection_error_count > 5:

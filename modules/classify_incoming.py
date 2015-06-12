@@ -1,5 +1,5 @@
 from helpers import Editable
-from modules import classifier
+from modules import Classifier
 from modules import ReviewBase
 from helpers.bot import Callback
 import functools
@@ -27,7 +27,7 @@ def register(review_db):
     ]
 
 
-def classify_editable(editable, match):
+def classify_editable(editable, match, review_db):
     """ Check whether the comment or submission is a review or not and
         add it to the database.
 
@@ -37,7 +37,7 @@ def classify_editable(editable, match):
         Returns:
             None
     """
-    classifier = Classifier(database_file='data/classified_reviews')
+    classifier = Classifier(database_file='data/classified_reviews.db')
 
     # Only comments and submissions can be reviews
     if editable.type not in [Editable.Comment, Editable.Submission]:
@@ -56,7 +56,7 @@ def classify_editable(editable, match):
             'subreddit': editable.subreddit,
             'title': editable.submission.title
         }
-        ReviewBase().insert(review)
+        review_db.insert(review)
 
 
 def _get_score(text):

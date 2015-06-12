@@ -38,7 +38,7 @@ class DataSet:
 class Classifier(metaclass=Singleton):
 
     def __init__(self, database_file='data/classified_reviews.db'):
-        training_set, test_set = create_sets(database_file)
+        training_set, test_set = self.create_sets(database_file)
 
         self.vectorizer = TfidfVectorizer(
             input         = 'content',
@@ -120,7 +120,7 @@ class Classifier(metaclass=Singleton):
         results['accuracy'] = (results['tp'] + results['tn']) / (results['tp'] + results['tn'] + results['fp'] + results['fn'])
         return results
 
-    def classify(text):
+    def classify(self, text):
         """ Classifies a body of text a whisky review or not.
 
             Args:
