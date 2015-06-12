@@ -80,8 +80,8 @@ def set_commandline_args():
         description='Parse the Reddit Whisky Review Archive.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('--log', default='info', metavar='LEVEL',
-                       help='Set the log level to debug or info.')
+    parser.add_argument('--debug', action='store_true',
+                       help='Set the log level to DEBUG.')
     parser.add_argument('--skip', type=int, default=0, metavar='N',
                        help='Skip the first n rows of the archive.')
     parser.add_argument('--filter-date', metavar='DATE', default='01/01/1970',
@@ -93,7 +93,7 @@ def set_commandline_args():
 if __name__ == '__main__':
     args = set_commandline_args()
     level = logging.INFO
-    if args.log == 'debug':
+    if args.debug:
         level = logging.DEBUG
     app.set_logging(info['log_filename'], level)
     logger = logging.getLogger(__name__)
