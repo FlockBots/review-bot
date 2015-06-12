@@ -10,6 +10,7 @@ import sys
 import logging
 from modules import list_reviews
 from modules import classify_incoming
+import argparse
 
 def set_logging(log_filename, level=logging.INFO):
     logging.basicConfig(
@@ -25,13 +26,20 @@ def set_logging(log_filename, level=logging.INFO):
     return logger
 
 
+def set_commandline_args():
+    parser = argparse.ArgumentParser(
+        description='Run /u/review_bot.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument('--debug', action='store_true',
+                        help='Set the log level to DEBUG.')
+    return parser.parse_args()
+
+
 def run():
-    if len(sys.argv) > 1 and sys.argv[1] == 'debug':
-        logger = set_logging(info['log_filename'], logging.DEBUG)
-        logger.info('running with logging on DEBUG.')
-    else:
-        logger = set_logging(info['log_filename'])
-        logger.info('Running with logging on INFO.')
+    args = set_commandline_args()
+    level = logging.DEBUG if args['debug'] else logging.INFO
+    logger = set_logging(info['log_filename'], level)
 
     reddit = praw.Reddit(info['useragent'])
     reddit.login(credentials['username'], credentials['password'])
