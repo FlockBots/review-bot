@@ -83,7 +83,7 @@ class Bot(metaclass=Singleton):
                 False, otherwise
         """
         has_callback = False
-        for regex, functions in self.trigger_callbacks.items():
+        for regex, functions in callbacks.items():
             string = editable.text
             match = re.match(regex, string)
             logging.debug('Matching `{regex}` on `{string}`'
