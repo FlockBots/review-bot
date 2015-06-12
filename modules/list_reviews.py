@@ -10,6 +10,7 @@ import functools
 
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 def register(review_db):
     """ Returns a list of tuples containing regular expressions and
