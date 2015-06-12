@@ -27,9 +27,10 @@ def set_logging(log_filename, level=logging.INFO):
 def run():
     if len(sys.argv) > 1 and sys.argv[1] == 'debug':
         logger = set_logging(info['log_filename'], logging.DEBUG)
-        logging.info('running with logging on Debug')
+        logger.info('running with logging on DEBUG.')
     else:
         logger = set_logging(info['log_filename'])
+        logger.info('Running with logging on INFO.')
 
     reddit = praw.Reddit(info['useragent'])
     reddit.login(credentials['username'], credentials['password'])
