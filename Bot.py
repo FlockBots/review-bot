@@ -99,10 +99,10 @@ Starting {0}...
         except requests.exceptions.HTTPError as e:
             self.http_error_count += 1
             if self.http_error_count > 5:
-                log.error('No connection available.')
+                logging.error('No connection available.')
                 raise EnvironmentError('No connection available.')
             else:
-                time.sleep(150)
+                time.sleep(600)
         except Exception as e:
             logging.exception('Terminating due to error')
             self.reddit.send_message(self.owner, 'Bot Down', 'Terminal Exception Occurred')
