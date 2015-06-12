@@ -5,6 +5,10 @@ from helpers.bot import Callback
 import functools
 
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+
+
 def register(review_db):
     """ Returns a list of tuples containing regular expressions and
         their callback functions
@@ -40,6 +44,8 @@ def classify_editable(editable, match):
 
     # if it is a review, then add it to the database.
     if classifier.classify(editable.text):
+        logger.info('Classified review: {}'
+                    .format(editable.permalink))
         review = {
             'author': editable.author,
             'bottle': '',
