@@ -96,15 +96,9 @@ class Bot(metaclass=Singleton):
         return has_callback
 
     def register_trigger(self, callback):
-        self.logger.debug('Registering "{fn}" at: "{regex}"'.format(
-            fn=callback.function.__name__, regex=callback.regex)
-        )
         self.trigger_callbacks.get(callback.regex, []).append(callback.function)
 
     def register_general(self, callback):
-        self.logger.debug('Registering "{fn}" at: "{regex}"'.format(
-            fn=callback.function.__name__, regex=callback.regex)
-        )
         self.general_callbacks.get(callback.regex, []).append(callback.function)
 
     def build_reply(self, text):
