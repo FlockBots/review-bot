@@ -39,14 +39,27 @@ def run():
 
     register_modules(bot)
 
+    connection_error_count = 0
+    # How long to wait before retrying at lost connection/busy Reddit.
+    connection_timeout = 10 * 60
     while True:
-        num_messages_read = bot.check_messages(mark_read=True)
-        for sub in info['review_subs']:
-            bot.check_comments(sub)
-        if num_messages_read < 3:
-            time.sleep(300)
+        try:
+            num_messages_read = bot.check_messages(mark_read=True)
+            for sub in info['review_subs']:
+                bot.check_comments(sub)
+        except requests.exception.HTTPError:
+            connection_error_count += 1
+            if connection_error_count > 5:
+                raise EnvironmentError('No connection available for {} seconds.'
+                    .format(5 * connection_timeout))
+            else:
+                time.sleep(connection_timeout)
+        except KeyboardInterrupt:
+            logger.info('Quitting by keyboard interrupt.')
+            return
         else:
-            time.sleep(60)
+            connection_error_count = 0
+        time.sleep(60)
 
 
 def register_modules(bot):
