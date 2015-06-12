@@ -24,7 +24,7 @@ class Bot(metaclass=Singleton):
         self.reddit = reddit
         self.database = database
         self.footer = footer or "___\n^(Hey I'm a bot! Please address any remarks to {}.)".format(info['owner'])
-        self.reply_text = None
+        self.reply_text = ''
         self.logger = logging.getLogger(__name__)
 
     def check_messages(self, mark_read=False):
@@ -83,16 +83,19 @@ class Bot(metaclass=Singleton):
                 False, otherwise
         """
         has_callback = False
-        for regex, functions in self.regex_callbacks.items():
+        for regex, functions in self.trigger_callbacks.items():
             string = editable.text
             match = re.match(regex, string)
+            logging.debug('Matching `{regex}` on `{string}`'
+                          .format(regex=regex, string=string))
             if match:
                 has_callback = True
                 for callback in functions:
                     reply = callback(editable, match)
                     if isinstance(reply, str):
                         self.build_reply(reply)
-        self.reply_to(editable)
+        if has_callback:
+            self.reply_to(editable)
         return has_callback
 
     def register_trigger(self, callback):
