@@ -3,6 +3,7 @@ from modules import classifier
 from modules import ReviewBase
 from helpers.bot import Callback
 import functools
+import logging
 
 
 logger = logging.getLogger(__name__)
