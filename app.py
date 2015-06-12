@@ -45,6 +45,8 @@ def run():
     logger.info('\tuser-agent: {}'.format(info['useragent']))
     logger.info('\tusername: {}'.format(credentials['username']))
     logger.info('\tdatabase: {}'.format(info['database_filename']))
+    logger.info('\tsubreddits: {}'.format(info['subreddits']))
+
     reddit = praw.Reddit(info['useragent'])
     reddit.login(credentials['username'], credentials['password'])
     database = Database(info['database_filename'])
