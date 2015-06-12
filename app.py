@@ -38,7 +38,7 @@ def set_commandline_args():
 
 def run():
     args = set_commandline_args()
-    level = logging.DEBUG if args['debug'] else logging.INFO
+    level = logging.DEBUG if args.debug else logging.INFO
     logger = set_logging(info['log_filename'], level)
 
     logger.info('Starting bot:')
