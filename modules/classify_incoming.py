@@ -4,6 +4,7 @@ from modules import ReviewBase
 from helpers.bot import Callback
 import functools
 import logging
+import re
 
 
 logger = logging.getLogger(__name__)
