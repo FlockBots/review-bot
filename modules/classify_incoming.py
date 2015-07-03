@@ -57,6 +57,7 @@ def classify_editable(editable, match, review_db):
             'subreddit': editable.subreddit,
             'title': editable.submission.title
         }
+        logger.debug(review)
         review_db.insert(review)
 
 
