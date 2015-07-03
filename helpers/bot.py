@@ -41,6 +41,8 @@ class Bot(metaclass=Singleton):
         total_read = 0
         for message in messages:
             if self.database.get_editable(message):
+                if mark_read:
+                    message.mark_as_read()
                 continue
             editable = Editable(message)
 
