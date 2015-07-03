@@ -49,12 +49,12 @@ def classify_editable(editable, match, review_db):
         logger.info('Classified review: {}'
                     .format(editable.permalink))
         review = {
-            'author': editable.author.name,
+            'author': editable.author.name.lower(),
             'bottle': '',
             'date': editable.date.strftime('%Y%m%d'),
             'permalink': editable.permalink,
             'score': _get_score(editable.text),
-            'subreddit': editable.subreddit,
+            'subreddit': editable.subreddit.display_name.lower(),
             'title': editable.submission.title
         }
         logger.debug(review)
