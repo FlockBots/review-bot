@@ -22,14 +22,14 @@ def register(review_db):
     """
     return [
         Callback(
-         regex=r'({username} list)'.format(
+         regex=r'(/u/{username} list)'.format(
             username=info['username']),
          function=functools.partial(list_reviews,
             review_db=review_db)
          ),
 
         Callback(
-         regex=r'{username} ({subs})'.format(
+         regex=r'/u/{username} ({subs})'.format(
             username=info['username'],
             subs='|'.join(info['review_subs'])),
          function=functools.partial(list_reviews_subreddit,
@@ -37,7 +37,7 @@ def register(review_db):
          ),
 
         Callback(
-         regex='''{username} [`'"]([a-zA-Z0-9_\ -]+)[`'"]'''.format(
+         regex='''/u/{username} [`'"]([a-zA-Z0-9_\ -]+)[`'"]'''.format(
             username=info['username']),
          function=functools.partial(list_reviews_bottle,
             review_db=review_db)
