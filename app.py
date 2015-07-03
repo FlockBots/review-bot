@@ -65,7 +65,7 @@ def run():
             bot.check_comments('flockbots')
             # for sub in info['review_subs']:
             #    bot.check_comments(sub)
-        except praw.errors.HTTPError:
+        except praw.errors.HTTPException:
             connection_error_count += 1
             if connection_error_count > 5:
                 raise EnvironmentError('No connection available for {} seconds.'
