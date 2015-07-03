@@ -88,8 +88,6 @@ class Bot(metaclass=Singleton):
             string = editable.text
             match = re.findall(regex, string, re.IGNORECASE)
             if match:
-                logging.debug('Matching `{regex}` on `{string}`'
-                              .format(regex=regex, string=string))
                 has_callback = True
                 for callback in functions:
                     reply = callback(editable, match)
