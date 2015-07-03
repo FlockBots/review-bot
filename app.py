@@ -42,13 +42,15 @@ def run():
 
     logger.info('Starting bot:')
     logger.info('\tuser-agent: {}'.format(info['useragent']))
-    logger.info('\tusername: {}'.format(credentials['username']))
     logger.info('\tdatabase: {}'.format(info['database_filename']))
     logger.info('\tsubreddits: {}'.format(info['subreddits']))
 
     reddit = praw.Reddit(info['useragent'])
     reddit.set_oauth_app_info(**credentials.oauth_info)
     reddit.refresh_access_information(credentials.refresh_token)
+
+    logger.info('\tlogged in as: {}'.format(reddit.user))
+
     database = Database(info['database_filename'])
     bot = Bot(reddit, database, footer='')
 

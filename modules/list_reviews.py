@@ -1,6 +1,5 @@
 from helpers.bot import Callback
 from config import info
-from config import credentials
 from modules import ReviewBase
 from fuzzywuzzy import fuzz
 from helpers.functions import peek
@@ -24,14 +23,14 @@ def register(review_db):
     return [
         Callback(
          regex=r'({username} list)'.format(
-            username=credentials['username']),
+            username=info['username']),
          function=functools.partial(list_reviews,
             review_db=review_db)
          ),
 
         Callback(
          regex=r'{username} ({subs})'.format(
-            username=credentials['username'],
+            username=info['username'],
             subs='|'.join(info['review_subs'])),
          function=functools.partial(list_reviews_subreddit,
             review_db=review_db)
@@ -39,7 +38,7 @@ def register(review_db):
 
         Callback(
          regex='''{username} [`'"]([a-zA-Z0-9_\ -]+)[`'"]'''.format(
-            username=credentials['username']),
+            username=info['username']),
          function=functools.partial(list_reviews_bottle,
             review_db=review_db)
          ),
