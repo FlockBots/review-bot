@@ -47,7 +47,8 @@ def run():
     logger.info('\tsubreddits: {}'.format(info['subreddits']))
 
     reddit = praw.Reddit(info['useragent'])
-    reddit.login(credentials['username'], credentials['password'])
+    reddit.set_oauth_app_info(**credentials.oauth_info)
+    reddit.refresh_access_information(credentials.refresh_token)
     database = Database(info['database_filename'])
     bot = Bot(reddit, database, footer='')
 
