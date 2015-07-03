@@ -64,6 +64,9 @@ def run():
             num_messages_read = bot.check_messages(mark_read=True)
             for sub in info['review_subs']:
                 bot.check_comments(sub)
+        except praw.errors.Forbidden:
+            # Access token expired
+            reddit.refresh_access_information(credentials.refresh_token)
         except praw.errors.HTTPException:
             connection_error_count += 1
             if connection_error_count > 5:
