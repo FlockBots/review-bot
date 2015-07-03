@@ -13,7 +13,6 @@ class Editable:
         self.original  = editable
         self.id        = editable.id
         self.author    = editable.author
-        self.permalink = editable.permalink
         self.date      = datetime.fromtimestamp(editable.created_utc)
         if isinstance(editable, praw.objects.Comment):
             self._set_comment_properties(editable)
@@ -25,6 +24,7 @@ class Editable:
             raise ValueError("Editable is not a PRAW message, comment or submission")
 
     def _set_comment_properties(self, editable):
+        self.permalink = editable.permalink
         self.reply = editable.reply
         self.text  = editable.body
         self.type  = Editable.Comment
@@ -32,6 +32,7 @@ class Editable:
         self.subreddit  = editable.subreddit
 
     def _set_submission_properties(self, editable):
+        self.permalink = editable.permalink
         self.reply = editable.add_comment
         self.text  = editable.self_text
         self.type  = Editable.Submission
@@ -39,6 +40,7 @@ class Editable:
         self.subreddit  = editable.subreddit
 
     def _set_message_properties(self, editable):
+        self.permalink = None
         self.reply = editable.reply
         self.text  = editable.body
         self.type  = Editable.Message
