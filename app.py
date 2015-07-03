@@ -4,7 +4,6 @@ from config import info
 from config import credentials
 from helpers import Bot
 from modules import ReviewBase
-from requests.exceptions import ConnectionError, HTTPError, Timeout
 import time
 import sys
 import logging
@@ -63,7 +62,7 @@ def run():
             bot.check_comments('flockbots')
             # for sub in info['review_subs']:
             #    bot.check_comments(sub)
-        except (ConnectionError, HTTPError, Timeout):
+        except praw.errors.HTTPError:
             connection_error_count += 1
             if connection_error_count > 5:
                 raise EnvironmentError('No connection available for {} seconds.'
