@@ -49,7 +49,7 @@ def classify_editable(editable, match, review_db):
         logger.info('Classified review: {}'
                     .format(editable.permalink))
         review = {
-            'author': editable.author,
+            'author': editable.author.name,
             'bottle': '',
             'date': editable.date.strftime('%Y%m%d'),
             'permalink': editable.permalink,
