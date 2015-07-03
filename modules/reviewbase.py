@@ -50,7 +50,7 @@ class ReviewBase(metaclass=Singleton):
                 )
             )
         except sqlite3.IntegrityError:
-            self.logger.info('Review ({}) already exists in database.'.format(review.permalink))
+            self.logger.info('Review ({}) already exists in database.'.format(review['permalink']))
         except sqlite3.Error:
             self.logger.exception('Unable to add review to database.')
         else:
