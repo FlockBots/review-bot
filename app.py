@@ -74,6 +74,9 @@ def run():
         except KeyboardInterrupt:
             logger.info('Quitting by keyboard interrupt.')
             return
+        except:
+            logging.error('Critical error.')
+            raise
         else:
             connection_error_count = 0
         time.sleep(60)
