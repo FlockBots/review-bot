@@ -62,10 +62,10 @@ class Bot(metaclass=Singleton):
         )
         for comment in comments:
             editable = Editable(comment)
-            self.check_callbacks(editable, self.general_callbacks)
             if self.database.get_editable(comment):
                 continue
 
+            self.check_callbacks(editable, self.general_callbacks)
             self.check_callbacks(editable, self.trigger_callbacks)
             self.database.store_editable(editable)
 
