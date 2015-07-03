@@ -74,16 +74,19 @@ def _get_score(text):
     # Search for the default xx/100 format (decimals up to two places allowed)
     out_of_hundred = re.findall(r'(\d{1,3})(?:[\.,]\d{1,2})?/100', text)
     if out_of_hundred:
+        logger.debug('Score out of hundred: {}'.format(out_of_hundred[0]))
         return int(out_of_hundred[0])
 
     # Search for the xx/10 format (decimals up to two places allowed)
     out_of_ten = re.findall(r'(\d{1,2})(?:[\.,]\d{1,2})?/10', text)
     if out_of_ten:
-        return int(out_of_ten[0])
+        logger.debug('Score out of ten: {}'.format(out_of_ten[0]))
+        return int(out_of_ten[0]) * 10
 
     # Grab any digit between 1 and 100, return the last
     other = re.findall(r'(\d{1,3})', text)
     if other:
+        logger.debug('Score: {}'.format(other[-1]))
         return int(other[-1])
 
     return None
