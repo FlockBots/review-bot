@@ -62,9 +62,8 @@ def run():
     while True:
         try:
             # num_messages_read = bot.check_messages(mark_read=True)
-            bot.check_comments('flockbots')
-            # for sub in info['review_subs']:
-            #    bot.check_comments(sub)
+            for sub in info['review_subs']:
+                bot.check_comments(sub)
         except praw.errors.HTTPException:
             connection_error_count += 1
             if connection_error_count > 5:
