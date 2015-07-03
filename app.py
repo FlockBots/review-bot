@@ -61,7 +61,7 @@ def run():
     connection_timeout = 10 * 60
     while True:
         try:
-            # num_messages_read = bot.check_messages(mark_read=True)
+            num_messages_read = bot.check_messages(mark_read=True)
             for sub in info['review_subs']:
                 bot.check_comments(sub)
         except praw.errors.HTTPException:
