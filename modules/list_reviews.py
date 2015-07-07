@@ -178,8 +178,10 @@ def _create_review_list(reviews, max_reviews=10):
     for index, review in enumerate(reviews):
         if index >= max_reviews:
             break
-        review_list += '* [{title}]({url})\n'.format(
-            title=review['title'], url=review['permalink']
+        review_list += '* {score}/100 | [{title}]({url})\n'.format(
+            score=review['score'] or '??',
+            title=review['title'],
+            url=review['permalink']
         )
     review_list += '\n'
     return review_list
