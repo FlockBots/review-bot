@@ -10,6 +10,7 @@ import logging
 from modules import list_reviews
 from modules import classify_incoming
 import argparse
+import requests
 
 def set_logging(log_filename, level=logging.INFO):
     logging.basicConfig(
@@ -67,7 +68,7 @@ def run():
         except praw.errors.OAuthInvalidToken:
             # Access token expired
             reddit.refresh_access_information(credentials.refresh_token)
-        except praw.errors.HTTPException:
+        except (praw.errors.HTTPException, requests.exceptions.HTTPError):
             connection_error_count += 1
             if connection_error_count > 5:
                 raise EnvironmentError('No connection available for {} seconds.'
@@ -78,7 +79,7 @@ def run():
             logger.info('Quitting by keyboard interrupt.')
             return
         except:
-            logging.error('Critical error.')
+            logging.exception('Critical error.')
             raise
         else:
             connection_error_count = 0
