@@ -1,3 +1,0 @@
-yeah.  if i don't hear back from the maintainer in the next day or so i might just fork the spreadsheet, slap a form on top of it and spread it far and wide.
-
-this needs to happen, and it is bigger than any one person.
