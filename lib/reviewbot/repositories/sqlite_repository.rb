@@ -30,23 +30,28 @@ module ReviewBot
         query = <<-SQL.strip
           SELECT #{columns} FROM database_reviews WHERE redditor = ? #{order} #{limit}
         SQL
-        p query
         results = @db.execute(query, [user])
         results.map { |result| ReviewBot::Review.new(*result) }
       end
 
-      def subreddit_reviews(username, subreddit)
-        raise NotImplementedError
+      def subreddit_reviews(subreddit)
+        query = <<-SQL.strip
+          SELECT #{columns} FROM database_reviews WHERE
+          lower(redditor) = ? AND lower(subreddit) = ? #{order} #{limit}
+        SQL
+        results = @db.execute(query, [user.downcase, subreddit.downcase])
+        results.map { |result| ReviewBot::Review.new(*result) }
       end
 
-      def whisky_reviews(username, whisky)
-        raise NotImplementedError
+      def whisky_reviews(whisky)
+        whisky = "%#{whisky}%".downcase
+        query = <<-SQL.strip
+          SELECT #{columns} FROM database_reviews WHERE
+          lower(redditor) = ? AND lower(whisky) LIKE ? #{order} #{limit}
+        SQL
+        results = @db.execute(query, [user.downcase, whisky])
+        results.map { |result| ReviewBot::Review.new(*result) }
       end
-
-      private
-
-
-
     end
   end
 end
