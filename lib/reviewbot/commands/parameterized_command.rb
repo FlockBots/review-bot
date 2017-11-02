@@ -7,9 +7,8 @@ module ReviewBot
       end
 
       def match(phrase)
-        data = phrase.scan(@regex)
-        return nil if data.empty?
-        data.map do |captures|
+        matches = phrase.scan(@regex)
+        matches.map do |captures|
           parameters = captures.values_at(*@indices)
           result = @callback.call(*parameters)
           CommandResult.new(parameters, result)

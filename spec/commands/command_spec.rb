@@ -8,12 +8,12 @@ describe Command do
   describe '#match' do
     it 'calls the block if the regex matches the phrase' do
       call = subject.match('rspec is fantastic!')
-      expect(call.result).to eq match_result
+      expect(call.first.result).to eq match_result
     end
 
     it 'returns nil if the regex does not match the phrase' do
       call = subject.match('ruby is fantastic!')
-      expect(call).to be_nil
+      expect(call).to be_empty
     end
   end
 end
