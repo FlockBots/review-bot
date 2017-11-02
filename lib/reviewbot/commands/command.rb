@@ -7,9 +7,8 @@ module ReviewBot
       end
 
       def match(phrase)
-        if @regex.match phrase
-          @callback.call
-        end
+        result = @callback.call if @regex.match? phrase
+        CommandResult.new([], result)
       end
     end
   end

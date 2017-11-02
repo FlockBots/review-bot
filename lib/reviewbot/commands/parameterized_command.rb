@@ -11,7 +11,8 @@ module ReviewBot
         return nil if data.empty?
         data.map do |captures|
           parameters = captures.values_at(*@indices)
-          @callback.call(*parameters)
+          result = @callback.call(*parameters)
+          CommandResult.new(parameters, result)
         end
       end
     end

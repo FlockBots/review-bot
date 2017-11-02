@@ -20,23 +20,23 @@ module ReviewBot
     end
 
     def watch_reddit
+      inbox.each { |message| analyze message }
+    end
+
+    def analyze(message)
+      @current_message = message
+
       commands = [recent_command, subreddit_command, whisky_command]
-      for message in inbox do
-        @repository.user = message.author
-        text = if message.respond_to? :selftext
-                 message.selftext
-               elsif message.respond_to? :body
-                 message.body
-               else
-                 raise 'Cannot retrieve text from message.'
-                 # todo: log and continue with next message
-               end
-        for command in commands
-          reviews = command.match(text)
-          next if result.nil? || result.empty?
-          reply(@repository.user, reviews)
-        end
+      commands.each do |command|
+        reviews = command.match(message.body)
+        build_reply(reviews)
       end
+
+      reply(@repository.user, reviews)
+    end
+
+    def build_reply(result)
+      return if result.nil?
     end
 
     def reply(user, reviews)
@@ -68,7 +68,7 @@ module ReviewBot
       prefix = "/u/#{username}"
       regex = /#{Regexp.quote(prefix)} (["'])((?:\\\1|.)*?)\1/
       ParameterizedCommand.new(regex, [1]) do |whisky|
-        whisky.gsub!(/\\/, '')
+        whisky.delete!('\\')
         @repository.whisky_reviews(whisky)
       end
     end
