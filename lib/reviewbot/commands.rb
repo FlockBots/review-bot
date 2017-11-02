@@ -1,4 +1,6 @@
-module ReviewBot::Commands
+module ReviewBot
+  module Commands
+  end
 end
 
 files = %w(command

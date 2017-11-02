@@ -49,7 +49,7 @@ describe Bot do
   describe '#subreddit_command' do
     it 'matches on name followed by "/r/" and a valid subreddit name' do
       subreddit = valid_subreddits.sample
-      expect(repository).to receive(:subreddit_reviews).with(10, subreddit)
+      expect(repository).to receive(:subreddit_reviews).with(subreddit)
           .and_return([])
       result = subject.send(:subreddit_command)
           .match("/u/#{username} /r/#{subreddit}")
@@ -68,7 +68,7 @@ describe Bot do
   describe '#whisky_command' do
     it 'matches on name followed by a string surrounded by single quotes' do
       expect(repository).to receive(:whisky_reviews)
-          .with(10, "Sir William's Scotch").and_return([])
+          .with("Sir William's Scotch").and_return([])
       result = subject.send(:whisky_command)
           .match("/u/#{username} 'Sir William\\'s Scotch'")
       expect(result).to_not be_nil
@@ -76,7 +76,7 @@ describe Bot do
 
     it 'matches on name followed by a string surrounded by double quotes' do
       expect(repository).to receive(:whisky_reviews)
-          .with(10, "Sir William's Scotch").and_return([])
+          .with("Sir William's Scotch").and_return([])
       result = subject.send(:whisky_command)
           .match("/u/#{username} \"Sir William's Scotch\"")
       expect(result).to_not be_nil

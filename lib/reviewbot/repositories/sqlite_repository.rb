@@ -8,8 +8,31 @@ module ReviewBot
         super(limit)
       end
 
-      def recent_reviews(username)
-        raise NotImplementedError
+      def columns
+        %w(whisky
+            region
+            redditor
+            url
+            subreddit
+            rating
+            published_at).join(', ')
+      end
+
+      def limit
+        "LIMIT #{@limit}"
+      end
+
+      def order
+        "ORDER BY published_at DESC"
+      end
+
+      def recent_reviews
+        query = <<-SQL.strip
+          SELECT #{columns} FROM database_reviews WHERE redditor = ? #{order} #{limit}
+        SQL
+        p query
+        results = @db.execute(query, [user])
+        results.map { |result| ReviewBot::Review.new(*result) }
       end
 
       def subreddit_reviews(username, subreddit)
@@ -19,6 +42,11 @@ module ReviewBot
       def whisky_reviews(username, whisky)
         raise NotImplementedError
       end
+
+      private
+
+
+
     end
   end
 end

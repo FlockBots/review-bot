@@ -23,11 +23,14 @@ module ReviewBot
       commands = [recent_command, subreddit_command, whisky_command]
       for message in inbox do
         @repository.user = message.author
-        text = message.respond_to?
-            case :selftext message.selftext
-            case :body     message.body
-            else raise 'Cannot retrieve text from message.'
-
+        text = if message.respond_to? :selftext
+                 message.selftext
+               elsif message.respond_to? :body
+                 message.body
+               else
+                 raise 'Cannot retrieve text from message.'
+                 # todo: log and continue with next message
+               end
         for command in commands
           reviews = command.match(text)
           next if result.nil? || result.empty?

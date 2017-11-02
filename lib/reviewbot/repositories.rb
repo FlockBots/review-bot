@@ -1,4 +1,6 @@
-module ReviewBot::Repositories
+module ReviewBot
+  module Repositories
+  end
 end
 
 files = %w(repository

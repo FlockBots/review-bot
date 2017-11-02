@@ -7,10 +7,12 @@ module ReviewBot
       end
 
       def match(phrase)
-        data = @regex.match phrase
-        return nil if data.nil?
-        parameters = @indices.map {|i| data.captures[i]}
-        @callback.call(*parameters)
+        data = phrase.scan(@regex)
+        return nil if data.empty?
+        data.map do |captures|
+          parameters = captures.values_at(*@indices)
+          @callback.call(*parameters)
+        end
       end
     end
   end
