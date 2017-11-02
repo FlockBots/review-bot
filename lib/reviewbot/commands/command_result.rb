@@ -1,9 +1,5 @@
 module ReviewBot
   module Commands
-    CommandResult = Struct.new(:parameters, :result) do
-      def nil?
-        result.nil?
-      end
-    end
+    CommandResult = Struct.new(:parameters, :return_value)
   end
 end

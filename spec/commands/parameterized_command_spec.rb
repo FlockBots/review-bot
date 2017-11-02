@@ -13,19 +13,19 @@ describe ParameterizedCommand do
     let(:adjective) { 'fantastic' }
 
     it 'calls the block with the captured arguments if the regex matches' do
-      call = subject.match("#{noun} is #{adjective}")
-      expect(call.count).to eq 1
-      results = call.first.result
-      parameters = call.first.parameters
+      calls = subject.match("#{noun} is #{adjective}")
+      expect(calls.count).to eq 1
+      results = calls.first.return_value
+      parameters = calls.first.parameters
       expect(results).to eq yoda(noun, adjective)
       expect(parameters).to eq [noun, adjective]
     end
 
     it 'can handle multiple matches' do
-      call = subject.match("#{noun} is #{adjective} and ruby is cool")
-      expect(call.count).to eq 2
-      results = call.map(&:result)
-      parameters = call.map(&:parameters)
+      calls = subject.match("#{noun} is #{adjective} and ruby is cool")
+      expect(calls.count).to eq 2
+      results = calls.map(&:return_value)
+      parameters = calls.map(&:parameters)
       expect(results).to eq [yoda(noun, adjective), yoda('ruby', 'cool')]
       expect(parameters).to eq [[noun, adjective], ['ruby', 'cool']]
     end
