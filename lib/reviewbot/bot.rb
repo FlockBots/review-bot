@@ -18,12 +18,21 @@ module ReviewBot
     end
 
     def inbox
-      @session.my_messages(mark: false)
+      options = { :category=>'unread' }.freeze
+      Redd::Models::PaginatedListing.new(@session.client, options) do |**req_options|
+        @session.my_messages(options.merge(req_options))
+      end.stream do |comment|
+        yield comment
+      end
+      raise 'Unexpected end of stream'
     end
 
     def watch_reddit
-      # todo: create endless stream?
-      inbox.each { |message| analyze message }
+      inbox do |message|
+        analyze message
+        reply
+        gets
+      end
     end
 
     def analyze(message)
@@ -35,8 +44,6 @@ module ReviewBot
         results = command.match(message.body) # [<CommandResult>]
         results.map {|result| build_reply(result)}
       end
-
-      reply
     end
 
     def build_reply(result)
@@ -45,16 +52,28 @@ module ReviewBot
       @reply_body += " (#{result.parameters.first})" if !result.parameters.empty?
       @reply_body += "\n\n"
       result.return_value.each do |review|
-        @reply_body += "* [#{review.whisky}](#{review.url})\n"
+        rating = review.rating.nil? ? '--' : review.rating
+        @reply_body += "* (#{review.rating}/100) [#{review.whisky}](#{review.url})\n"
+      end
+      if result.return_value.empty?
+        @reply_body += "_No results. :(_\n"
       end
       @reply_body += "\n"
     end
 
     def reply
+      @reply_body += footer
       puts @reply_body
     end
 
     private
+
+    def footer
+      "___\n^("\
+        "More info? Ask /u/FlockOnFire or read "\
+        "[here](https://github.com/FlockBots/ReviewBot)"\
+        ")"
+    end
 
     def recent_command
       prefix = "/u/#{username} latest"
