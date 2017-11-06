@@ -1,21 +1,19 @@
 module ReviewBot
   module Repositories
     class Repository
-      attr_accessor :user
-
       def initialize(limit)
         @limit = limit
       end
 
-      def recent_reviews(limit)
+      def recent_reviews
         raise NotImplementedError
       end
 
-      def subreddit_reviews(limit, subreddit)
+      def subreddit_reviews(username, subreddit)
         raise NotImplementedError
       end
 
-      def whisky_reviews(limit, whisky)
+      def whisky_reviews(username, whisky)
         raise NotImplementedError
       end
     end

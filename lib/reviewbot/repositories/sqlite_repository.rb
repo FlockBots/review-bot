@@ -26,7 +26,7 @@ module ReviewBot
         "ORDER BY published_at DESC"
       end
 
-      def recent_reviews
+      def recent_reviews(username)
         query = <<-SQL.strip
           SELECT #{columns} FROM database_reviews WHERE redditor = ? #{order} #{limit}
         SQL
@@ -34,7 +34,7 @@ module ReviewBot
         results.map { |result| ReviewBot::Review.new(*result) }
       end
 
-      def subreddit_reviews(subreddit)
+      def subreddit_reviews(username, subreddit)
         query = <<-SQL.strip
           SELECT #{columns} FROM database_reviews WHERE
           lower(redditor) = ? AND lower(subreddit) = ? #{order} #{limit}
@@ -43,7 +43,7 @@ module ReviewBot
         results.map { |result| ReviewBot::Review.new(*result) }
       end
 
-      def whisky_reviews(whisky)
+      def whisky_reviews(username, whisky)
         whisky = "%#{whisky}%".downcase
         query = <<-SQL.strip
           SELECT #{columns} FROM database_reviews WHERE
