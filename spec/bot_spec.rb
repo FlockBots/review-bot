@@ -7,6 +7,7 @@ describe Bot do
   let(:caller) { "bob" }
   let(:session) { double(:session, me: user) }
   let(:repository) { double(:repository) }
+  let(:logger) { double(:logger) }
 
   let(:valid_subreddits) do
     # start with letter or number, 3-21 characters
@@ -25,7 +26,7 @@ describe Bot do
   end
 
   subject do
-    Bot.new(session, repository)
+    Bot.new(session, repository, logger)
   end
 
   describe '#recent_command' do
@@ -80,8 +81,8 @@ describe Bot do
       result = subject.send(:whisky_command)
                       .match("/u/#{username} 'Sir William\\'s Scotch'", caller)
       expect(result).to_not be_empty
-      parameters = result.first.parameters
-      expect(parameters).to eq [caller, "Sir William's Scotch"]
+      arguments = result.first.arguments
+      expect(arguments).to eq [caller, "Sir William's Scotch"]
     end
 
     it 'matches on name followed by a string surrounded by double quotes' do
@@ -91,8 +92,8 @@ describe Bot do
       result = subject.send(:whisky_command)
                       .match("/u/#{username} \"Sir William's Scotch\"", caller)
       expect(result).to_not be_empty
-      parameters = result.first.parameters
-      expect(parameters).to eq [caller, "Sir William's Scotch"]
+      arguments = result.first.arguments
+      expect(arguments).to eq [caller, "Sir William's Scotch"]
     end
 
     it 'does not match on mismatching quotes' do

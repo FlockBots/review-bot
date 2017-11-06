@@ -30,7 +30,7 @@ module ReviewBot
         query = <<-SQL.strip
           SELECT #{columns} FROM database_reviews WHERE redditor = ? #{order} #{limit}
         SQL
-        results = @db.execute(query, [user])
+        results = @db.execute(query, [username])
         results.map { |result| ReviewBot::Review.new(*result) }
       end
 
@@ -39,7 +39,7 @@ module ReviewBot
           SELECT #{columns} FROM database_reviews WHERE
           lower(redditor) = ? AND lower(subreddit) = ? #{order} #{limit}
         SQL
-        results = @db.execute(query, [user.downcase, subreddit.downcase])
+        results = @db.execute(query, [username.downcase, subreddit.downcase])
         results.map { |result| ReviewBot::Review.new(*result) }
       end
 
@@ -49,7 +49,7 @@ module ReviewBot
           SELECT #{columns} FROM database_reviews WHERE
           lower(redditor) = ? AND lower(whisky) LIKE ? #{order} #{limit}
         SQL
-        results = @db.execute(query, [user.downcase, whisky])
+        results = @db.execute(query, [username.downcase, whisky])
         results.map { |result| ReviewBot::Review.new(*result) }
       end
     end
