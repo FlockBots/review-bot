@@ -4,6 +4,7 @@ include ReviewBot::Commands
 describe Bot do
   let(:username) { 'review_bot' }
   let(:user) { double(:user, name: username )}
+  let(:caller) { "bob" }
   let(:session) { double(:session, me: user) }
   let(:repository) { double(:repository) }
 
@@ -29,20 +30,24 @@ describe Bot do
 
   describe '#recent_command' do
     it 'matches on name followed by "latest"' do
-      expect(repository).to receive(:recent_reviews).and_return([])
-      result = subject.send(:recent_command).match("/u/#{username} latest")
+      expect(repository).to receive(:recent_reviews)
+          .with(caller)
+          .and_return([])
+      command = subject.send(:recent_command)
+      result = command.match("/u/#{username} latest", caller)
       expect(result).to_not be_empty
     end
 
     it 'does not match on just the username ' do
       expect(repository).to_not receive(:recent_reviews)
-      result = subject.send(:recent_command).match("/u/#{username}")
+      result = subject.send(:recent_command).match("/u/#{username}", caller)
       expect(result).to be_empty
     end
 
     it 'does not match on just the username followed by other text' do
       expect(repository).to_not receive(:recent_reviews)
-      result = subject.send(:recent_command).match("/u/#{username} lorem ipsum")
+      command = subject.send(:recent_command)
+      result = command.match("/u/#{username} lorem ipsum", caller)
       expect(result).to be_empty
     end
   end
@@ -51,10 +56,10 @@ describe Bot do
     it 'matches on name followed by "/r/" and a valid subreddit name' do
       subreddit = valid_subreddits.sample
       expect(repository).to receive(:subreddit_reviews)
-                        .with(subreddit)
+                        .with(caller, subreddit)
                         .and_return([])
       result = subject.send(:subreddit_command)
-                      .match("/u/#{username} /r/#{subreddit}")
+                      .match("/u/#{username} /r/#{subreddit}", caller)
       expect(result).to_not be_nil
     end
 
@@ -62,7 +67,7 @@ describe Bot do
       subreddit = invalid_subreddits.sample
       expect(repository).to_not receive(:subreddit_reviews)
       result = subject.send(:subreddit_command)
-                      .match("/u/#{username} /r/#{subreddit}")
+                      .match("/u/#{username} /r/#{subreddit}", caller)
       expect(result).to be_empty
     end
   end
@@ -70,30 +75,30 @@ describe Bot do
   describe '#whisky_command' do
     it 'matches on name followed by a string surrounded by single quotes' do
       expect(repository).to receive(:whisky_reviews)
-                        .with("Sir William's Scotch")
+                        .with(caller, "Sir William's Scotch")
                         .and_return([])
       result = subject.send(:whisky_command)
-                      .match("/u/#{username} 'Sir William\\'s Scotch'")
+                      .match("/u/#{username} 'Sir William\\'s Scotch'", caller)
       expect(result).to_not be_empty
-      parameter = result.first.parameters.first
-      expect(parameter).to eq "Sir William's Scotch"
+      parameters = result.first.parameters
+      expect(parameters).to eq [caller, "Sir William's Scotch"]
     end
 
     it 'matches on name followed by a string surrounded by double quotes' do
       expect(repository).to receive(:whisky_reviews)
-                        .with("Sir William's Scotch")
+                        .with(caller, "Sir William's Scotch")
                         .and_return([])
       result = subject.send(:whisky_command)
-                      .match("/u/#{username} \"Sir William's Scotch\"")
+                      .match("/u/#{username} \"Sir William's Scotch\"", caller)
       expect(result).to_not be_empty
-      parameter = result.first.parameters.first
-      expect(parameter).to eq "Sir William's Scotch"
+      parameters = result.first.parameters
+      expect(parameters).to eq [caller, "Sir William's Scotch"]
     end
 
     it 'does not match on mismatching quotes' do
       expect(repository).to_not receive(:whisky_reviews)
       result = subject.send(:whisky_command)
-                      .match("/u/#{username} \"Caol Ila'")
+                      .match("/u/#{username} \"Caol Ila'", caller)
       expect(result).to be_empty
     end
   end

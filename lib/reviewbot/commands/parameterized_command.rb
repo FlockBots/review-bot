@@ -1,7 +1,7 @@
 module ReviewBot
   module Commands
     class ParameterizedCommand < Command
-      def initialize(regex, indices, &callback)
+      def initialize(regex, indices=[], &callback)
         @indices = indices
         super(regex, &callback)
       end

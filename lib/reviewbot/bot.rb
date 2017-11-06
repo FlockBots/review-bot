@@ -71,8 +71,8 @@ module ReviewBot
     end
 
     def recent_command
-      prefix = "/u/#{username} latest"
-      regex = /#{Regexp.quote(prefix)}/i
+      prefix = "/u/#{username}"
+      regex = /#{Regexp.quote(prefix)} (latest)/i
       ParameterizedCommand.new(regex) do |username|
         @repository.recent_reviews(username)
       end
@@ -82,8 +82,8 @@ module ReviewBot
       prefix = "/u/#{username} /r/"
 
       # command taken from reddit source: reddit/reddit: r2/models/subreddit.py
-      subreddit = /[A-Za-z0-9][A-Za-z0-9_]{2,20}/
-      regex = /#{Regexp.quote(prefix)}(#{subreddit})($|[^A-Za-z0-9_])/i
+      subreddit = /[a-z0-9][a-z0-9_]{2,20}/
+      regex = /#{Regexp.quote(prefix)}(#{subreddit})($|[^a-z0-9_])/i
       ParameterizedCommand.new(regex, [0]) do |username, sub|
         @repository.subreddit_reviews(username, sub)
       end
