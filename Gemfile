@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'dotenv', '~> 2.2.1'
 gem 'factory_bot', '~> 4.8'
 gem 'redd', '~> 0.8'
 gem 'rspec', '~> 3.7'
