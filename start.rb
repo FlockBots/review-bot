@@ -5,6 +5,7 @@ require 'redd'
 
 require_relative 'lib/reviewbot'
 
+File.write('reviewbot.pid', Process.pid)
 Dotenv.load '.env' if File.exists? '.env'
 
 db = File.expand_path(ENV['RB_DB'])
