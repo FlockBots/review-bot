@@ -56,7 +56,7 @@ module ReviewBot
       @logger.debug(result.return_value.count)
       result.return_value.each do |review|
         rating = review.rating.nil? ? '--' : review.rating
-        reply_body += "* (#{review.rating}/100) [#{review.whisky}](#{review.url})\n"
+        reply_body += "* #{review.rating}/100 - [#{review.whisky}](#{review.url})\n"
       end
       if result.return_value.empty?
         reply_body += "_No results._\n"
