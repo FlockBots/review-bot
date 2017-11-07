@@ -15,7 +15,7 @@ module ReviewBot
     end
 
     def inbox
-      options = { category: 'unread', mark: true }.freeze
+      options = { category: 'unread', mark: false }.freeze
       Redd::Models::PaginatedListing.new(@session.client, options) do |**req_options|
         @session.my_messages(options.merge(req_options))
       end.stream do |comment|
@@ -28,6 +28,7 @@ module ReviewBot
       inbox do |message|
         text = analyze message
         reply(text + footer, message) unless text.empty?
+        message.mark_as_read
       end
     end
 
