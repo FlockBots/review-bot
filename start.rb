@@ -18,7 +18,8 @@ session = Redd.it(
   password:   ENV['RB_PASSWORD']
 )
 
-logger = Logger.new(STDOUT, level: ENV['RB_LOGLEVEL'])
+logfile = ENV['DB_LOGFILE'] || STDOUT
+logger = Logger.new(logfile, level: ENV['RB_LOGLEVEL'])
 
 bot = ReviewBot::Bot.new(session, repository, logger)
 bot.watch_reddit
