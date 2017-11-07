@@ -18,8 +18,7 @@ session = Redd.it(
   password:   ENV['RB_PASSWORD']
 )
 
-logfile = File.open(ENV['RB_LOGFILE'], File::WRONLY | File::APPEND | File::CREAT)
-logger = Logger.new(logfile, 3, 2 ** 20, level: ENV['RB_LOGLEVEL'])
+logger = Logger.new(STDOUT, level: ENV['RB_LOGLEVEL'])
 
 bot = ReviewBot::Bot.new(session, repository, logger)
 bot.watch_reddit

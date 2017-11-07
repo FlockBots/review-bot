@@ -15,7 +15,7 @@ module ReviewBot
     end
 
     def inbox
-      options = { category: 'unread', mark: false }.freeze
+      options = { category: 'unread', mark: true }.freeze
       Redd::Models::PaginatedListing.new(@session.client, options) do |**req_options|
         @session.my_messages(options.merge(req_options))
       end.stream do |comment|
@@ -66,9 +66,7 @@ module ReviewBot
     def reply(text, message)
       return if text.empty?
       @logger.info("[#{message.id}]\tReplying to #{message.author.name}")
-      # message.reply(text)
-      puts text
-      gets
+      message.reply(text)
     end
 
     private
