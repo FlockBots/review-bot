@@ -73,10 +73,9 @@ module ReviewBot
     private
 
     def footer
-      "___\n^("\
-        "More info? Ask /u/FlockOnFire or read "\
-        "[here](https://github.com/FlockBots/review-bot)"\
-        ")"
+      "___\n"\
+        "^(More info? Ask /u/FlockOnFire or click )"\
+        "^[here](https://github.com/FlockBots/review-bot)."
     end
 
     def get_text(message)
