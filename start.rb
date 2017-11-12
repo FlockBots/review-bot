@@ -1,4 +1,4 @@
-require 'logger'
+require 'better-logger'
 
 require 'dotenv'
 require 'redd'
@@ -19,8 +19,34 @@ session = Redd.it(
   password:   ENV['RB_PASSWORD']
 )
 
-logfile = ENV['DB_LOGFILE'] || STDOUT
-logger = Logger.new(logfile, level: ENV['RB_LOGLEVEL'])
+infolog = ENV['RB_INFOLOG'] || STDOUT
+errorlog = ENV['RB_ERRORLOG'] || STDERR
+level = ENV['RB_LOGLEVEL'] || 'info'
+
+Better::Logger.config :logger do |conf|
+  conf.color     = false
+  conf.log_to    = infolog
+  conf.error_to  = errorlog
+  conf.log_level = level.to_sym
+end
+
+logger.info('Starting new session.')
 
 bot = ReviewBot::Bot.new(session, repository, logger)
-bot.watch_reddit
+
+retry_cap = 10 # seconds
+
+begin
+  bot.watch_reddit
+  retries = 0
+rescue HTTP::ConnectionError => e
+  logger.error e
+  raise if retries > retry_cap
+  retries += 1
+  timeout = 2 ** retries
+  logger.info "Retrying in #{timeout} seconds."
+  sleep(timeout)
+  retry
+rescue => e
+  logger.fatal e
+end
