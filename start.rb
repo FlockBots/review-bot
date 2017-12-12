@@ -16,7 +16,8 @@ session = Redd.it(
   client_id:  ENV['RB_CLIENT_ID'],
   secret:     ENV['RB_SECRET'],
   username:   ENV['RB_USERNAME'],
-  password:   ENV['RB_PASSWORD']
+  password:   ENV['RB_PASSWORD'],
+  max_retries: ENV['RB_RETRIES'] || 0
 )
 
 infolog = ENV['RB_INFOLOG'] || STDOUT
@@ -49,4 +50,5 @@ rescue HTTP::TimeoutError => e
   retry
 rescue => e
   logger.fatal e
+  raise e
 end
