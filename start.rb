@@ -34,14 +34,14 @@ logger.info('Starting new session.')
 
 bot = ReviewBot::Bot.new(session, repository, logger)
 
-retry_cap = 10 # seconds
+retry_cap = 10 # 2**retry_cap seconds
 
 begin
   bot.watch_reddit
   retries = 0
-rescue HTTP::ConnectionError => e
+rescue HTTP::TimeoutError => e
   logger.error e
-  raise if retries > retry_cap
+  raise e if retries > retry_cap
   retries += 1
   timeout = 2 ** retries
   logger.info "Retrying in #{timeout} seconds."
