@@ -18,56 +18,33 @@ module ReviewBot
       options = { category: 'unread', mark: false }.freeze
       Redd::Models::PaginatedListing.new(@session.client, options) do |**req_options|
         @session.my_messages(options.merge(req_options))
-      end.stream do |comment|
-        yield comment
-      end
-      raise 'Unexpected end of stream'
+      end.stream
     end
 
     def watch_reddit
       inbox do |message|
-        text = analyze message
-        reply(text + footer, message) unless text.empty?
+        text = analyze(message)
+        message.reply(text + footer) unless text.empty?
         message.mark_as_read
       end
     end
 
-    def analyze(message)
-      username = message.author.name
-      @logger.debug("[#{message.id}]\tAnalyzing")
+    def analyze(comment)
+      username = comment.author.name
       commands = [recent_command, subreddit_command, whisky_command]
+
       commands.map do |command|
-        text = get_text(message)
+        text = comment.body
         results = command.match(text, username)
-        unless results.empty?
-          @logger.debug("Results: #{results}")
-          results.map {|result| build_reply(result, message.author.name)}
-        end
-      end.flatten.reject(&:nil?).join("\n")
+        results.map {|result| build_reply(result, username)}
+      end.flatten.join("\n")
     end
 
     def build_reply(result, username)
       return '' if result.return_value.nil?
-      reply_body = "/u/#{username}'s latest reviews"
-      arguments = result.arguments.clone
-      arguments.shift # shift off username -- TODO: Too coupled
-      reply_body += " (#{arguments.first})" unless arguments.empty?
-      reply_body += "\n\n"
-      @logger.debug(result.return_value.count)
-      result.return_value.each do |review|
-        rating = review.rating.nil? ? '--' : review.rating
-        reply_body += "* #{review.rating}/100 - [#{review.whisky}](#{review.url})\n"
-      end
-      if result.return_value.empty?
-        reply_body += "_No results._\n"
-      end
-      reply_body + "\n"
-    end
-
-    def reply(text, message)
-      return if text.empty?
-      @logger.info("[#{message.id}]\tReplying to #{message.author.name}")
-      message.reply(text)
+      reply_body = header(username, arguments)
+      reviews = reviews_list(result.return_value) || "_No results._"
+      reply_body + "\n\n"
     end
 
     private
@@ -78,18 +55,24 @@ module ReviewBot
         "^[here](https://github.com/FlockBots/review-bot)."
     end
 
-    def get_text(message)
-      if message.respond_to? :body
-        message.body
-      elsif message.respond_to? :selftext
-        message.selftext
-      else
-        raise 'Cannot retrieve text from message.'
-      end
+    def header(username, arguments)
+      args = arguments.clone.shift # shift off bot's username
+      reply_body = "/u/#{username}'s latest reviews"
+      reply_body << " (#{args.first})" unless args.empty?
+      reply_body << "\n\n"
+    end
+
+    def reviews_list(reviews)
+      reviews.map do |review|
+        "* #{review.rating_string}/100 - [#{review.whisky}](#{review.url})"
+      end.join("\n")
+    end
+
+    def prefix
+      "/u/#{username}"
     end
 
     def recent_command
-      prefix = "/u/#{username}"
       regex = /#{Regexp.quote(prefix)} (latest)/i
       ParameterizedCommand.new(regex) do |username|
         @repository.recent_reviews(username)
@@ -97,18 +80,15 @@ module ReviewBot
     end
 
     def subreddit_command
-      prefix = "/u/#{username} /r/"
-
-      # command taken from reddit source: reddit/reddit: r2/models/subreddit.py
+      # regex taken from reddit source: reddit/reddit: r2/models/subreddit.py
       subreddit = /[a-z0-9][a-z0-9_]{2,20}/
-      regex = /#{Regexp.quote(prefix)}(#{subreddit})($|[^a-z0-9_])/i
+      regex = /#{Regexp.quote(prefix)} \/r\/(#{subreddit})($|[^a-z0-9_])/i
       ParameterizedCommand.new(regex, [0]) do |username, sub|
         @repository.subreddit_reviews(username, sub)
       end
     end
 
     def whisky_command
-      prefix = "/u/#{username}"
       regex = /#{Regexp.quote(prefix)} (["'])((?:\\\1|.)*?)\1/i
       ParameterizedCommand.new(regex, [1]) do |username, whisky|
         whisky.delete!('\\')
