@@ -16,13 +16,15 @@ module ReviewBot
 
     def inbox
       options = { category: 'unread', mark: false }.freeze
-      Redd::Models::PaginatedListing.new(@session.client, options) do |**req_options|
-        @session.my_messages(options.merge(req_options))
-      end.stream
+      # Redd::Models::PaginatedListing.new(@session.client, options) do |**req_options|
+      #   @session.my_messages(options.merge(req_options))
+      # end.stream
+      ms = @session.my_messages(options)
+      ms.to_ary
     end
 
     def watch_reddit
-      inbox do |message|
+      inbox.each do |message|
         text = analyze(message)
         message.reply(text + footer) unless text.empty?
         message.mark_as_read
@@ -42,21 +44,21 @@ module ReviewBot
 
     def build_reply(result, username)
       return '' if result.return_value.nil?
-      reply_body = header(username, arguments)
-      reviews = reviews_list(result.return_value) || "_No results._"
-      reply_body + "\n\n"
+      reply_body = header(username, result.arguments)
+      reply_body << reviews_list(result.return_value) || "_No results._"
+      reply_body << "\n\n"
     end
 
     private
 
     def footer
       "___\n"\
-        "^(More info? Ask /u/FlockOnFire or click )"\
-        "^[here](https://github.com/FlockBots/review-bot)."
+        "^(More info? Ask) [^(FlockOnFire)](https://reddit.com/u/flockonfire) ^(or click) "\
+        "[^(here.)](https://github.com/FlockBots/review-bot)"
     end
 
     def header(username, arguments)
-      args = arguments.clone.shift # shift off bot's username
+      args = arguments.clone.drop 1
       reply_body = "/u/#{username}'s latest reviews"
       reply_body << " (#{args.first})" unless args.empty?
       reply_body << "\n\n"

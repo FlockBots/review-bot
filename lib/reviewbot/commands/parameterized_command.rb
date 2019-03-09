@@ -12,6 +12,7 @@ module ReviewBot
           raise 'Expected regex to have capture groups' if !captures.is_a? Array
           arguments = args + captures.values_at(*@indices)
           result = @callback.call(*arguments)
+          puts *arguments
           CommandResult.new(arguments, result)
         end
       end

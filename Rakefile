@@ -6,6 +6,7 @@ require_relative './lib/reviewbot'
 task default: :spec
 
 task :run do
+  puts 'Starting Review Bot'
   load_environment
   session = create_session
   logger = create_logger
@@ -13,13 +14,12 @@ task :run do
   db = File.expand_path(ENV['RB_DB'])
   repository = ReviewBot::Repositories::Sqlite.new(10, db)
 
-  logger.info('Starting a new session.')
+  # logger.info('Starting a new session.')
   bot = ReviewBot::Bot.new(session, repository, logger)
 
-  retry_cap = 10
-
+  retry_cap = 6
+  retries = 0
   begin
-    retries = 0
     bot.watch_reddit
   rescue => e
     logger.error e
@@ -30,4 +30,5 @@ task :run do
     sleep(timeout)
     retry
   end
+  puts 'done'
 end
